@@ -1,32 +1,31 @@
-import type { Profile } from "@gr/shared-ui";
-import { AuthError, type AuthService } from "./auth-service.ts";
+import { AuthError, type AppUser, type AuthService } from "./auth-service.ts";
 
 export const DEMO_EMAIL = "residente@demo.com";
 export const DEMO_PASSWORD = "Demo1234!";
 const SESSION_KEY = "gr-demo-session";
 const PROFILE_KEY = "gr-demo-profile";
-const initialProfile: Profile = {
+const initialProfile: AppUser = {
   id: "demo-resident",
   name: "Andrea Martínez",
   email: DEMO_EMAIL,
   phone: "300 123 4567",
+  roles: ["RESIDENTE"],
 };
 
 type DemoStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
-function isDemoProfile(value: unknown): value is Profile {
+function isDemoProfile(value: unknown): value is AppUser {
   if (!value || typeof value !== "object") return false;
   const profile = value as Record<string, unknown>;
   return (
     profile.id === initialProfile.id &&
     profile.email === DEMO_EMAIL &&
     typeof profile.name === "string" &&
-    typeof profile.phone === "string"
+    typeof profile.phone === "string" &&
+    Array.isArray(profile.roles)
   );
 }
 
-// A UI demo, not authentication. Never store real passwords or tokens here.
-// A storage factory allows SSR to import this file without reading window.
 export function createDemoAuthService(getStorage: () => DemoStorage): AuthService {
   function storage() {
     try {
@@ -36,7 +35,7 @@ export function createDemoAuthService(getStorage: () => DemoStorage): AuthServic
     }
   }
 
-  function readProfile(): Profile {
+  function readProfile(): AppUser {
     try {
       const saved = storage().getItem(PROFILE_KEY);
       if (saved) {
@@ -45,7 +44,6 @@ export function createDemoAuthService(getStorage: () => DemoStorage): AuthServic
       }
     } catch (error) {
       if (error instanceof AuthError) throw error;
-      // Old or malformed demo data can be safely replaced with the sample.
     }
     return { ...initialProfile };
   }
