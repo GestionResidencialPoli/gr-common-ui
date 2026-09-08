@@ -1,11 +1,13 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { LoginValues, Profile, ProfileValues } from "@gr/shared-ui";
+import type { LoginValues, ProfileValues } from "@gr/shared-ui";
+import { onSessionExpired } from "@/lib/http-client";
 import { authService } from "@/services";
+import type { AppUser } from "@/services/auth-service";
 
 type AuthContextValue = {
-  user: Profile | null;
+  user: AppUser | null;
   loading: boolean;
   sessionError: boolean;
   login: (values: LoginValues) => Promise<void>;
@@ -16,7 +18,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<Profile | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionError, setSessionError] = useState(false);
 
@@ -37,6 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       active = false;
     };
   }, []);
+
+  useEffect(() => onSessionExpired(() => setUser(null)), []);
 
   async function login(values: LoginValues) {
     const profile = await authService.login(values);

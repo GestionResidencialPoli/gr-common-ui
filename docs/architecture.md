@@ -91,9 +91,15 @@ Los cambios sobreviven a una recarga y a un cierre/inicio de sesión en la misma
 
 El servicio recibe una función que entrega el almacenamiento. Esto permite importarlo sin acceder a `window` durante el renderizado del servidor y probarlo con almacenamiento en memoria.
 
-`services/index.ts` decide qué servicio utilizar. En desarrollo, el modo predeterminado es demo. En producción, si no se configura nada, el servicio no permite iniciar sesión. `NEXT_PUBLIC_AUTH_MODE=demo` permite una demostración explícita, incluso en una compilación de producción. Esa variable es pública y nunca debe contener secretos.
+`services/index.ts` decide qué servicio utilizar. En desarrollo, el modo predeterminado es demo. Fuera de ese modo, el servicio usado es `services/real-auth-service.ts`. `NEXT_PUBLIC_AUTH_MODE=demo` permite una demostración explícita, incluso en una compilación de producción. Esa variable es pública y nunca debe contener secretos.
 
-Cuando se aborde el backend, se podrá añadir un adaptador que implemente `AuthService` y seleccionarlo en `services/index.ts`. El contrato real podría requerir ajustar también los tipos y estados; no se han supuesto endpoints, JWT, cookies, recuperación de contraseña ni refresh tokens.
+`real-auth-service.ts` implementa `AuthService` contra `gr-user-microservice`: `login` llama a `POST /api/v1/auth/login`, `getSession` a `GET /api/v1/auth/me` (única forma de conocer identidad y rol, ya que el access token es `HttpOnly` y el login no devuelve cuerpo) y `logout` a `POST /api/v1/auth/logout`. `updateProfile` lanza `not_configured`: el backend todavía no expone un endpoint para editar el propio perfil.
+
+Todas las llamadas pasan por `lib/http-client.ts`, que agrega el header `X-XSRF-TOKEN` en mutaciones, reintenta una vez tras `POST /api/v1/auth/refresh` si la petición recibe `401`, y notifica a los suscriptores de `onSessionExpired` (hoy solo `AuthProvider`) si el refresco también falla. El navegador nunca contacta al backend directamente: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` del lado del servidor, para que las cookies `SameSite=Strict` del backend viajen sin problemas de origen cruzado en cualquier entorno.
+
+`proxy.ts` (el archivo que reemplazó a `middleware.ts`) redirige a `/login` en toda ruta protegida cuando no hay cookie `access_token`; se desactiva en modo demo, que no usa cookies.
+
+El contrato de `AuthService` se extendió con `AppUser = Profile & { roles: Role[] }` (en `services/auth-service.ts`, no en `@gr/shared-ui`) para que el frontend pueda proteger rutas por rol sin que la biblioteca compartida conozca roles.
 
 ## 6. Edición del perfil
 

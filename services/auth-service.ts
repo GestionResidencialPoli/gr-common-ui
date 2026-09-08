@@ -1,11 +1,13 @@
 import type { LoginValues, Profile, ProfileValues } from "@gr/shared-ui";
 
-// This contract is the only piece a future API adapter must implement.
+export type Role = "RESIDENTE" | "VIGILANTE" | "ADMINISTRACION";
+export type AppUser = Profile & { roles: Role[] };
+
 export interface AuthService {
-  getSession(): Promise<Profile | null>;
-  login(values: LoginValues): Promise<Profile>;
+  getSession(): Promise<AppUser | null>;
+  login(values: LoginValues): Promise<AppUser>;
   logout(): Promise<void>;
-  updateProfile(values: ProfileValues): Promise<Profile>;
+  updateProfile(values: ProfileValues): Promise<AppUser>;
 }
 
 export type AuthErrorCode =
