@@ -1,0 +1,82 @@
+@import "@gr/shared-ui/styles.css";
+
+.page-heading {
+  margin-bottom: 32px;
+}
+.page-heading h1 {
+  margin: 12px 0;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(220px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.profile-card h2 {
+  margin-bottom: 25px;
+}
+.profile-summary .gr-avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 20px;
+  margin-bottom: 18px;
+}
+.profile-summary p {
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.home-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 23px 25px;
+}
+.home-note h2 {
+  font-size: 14px;
+}
+.home-note p {
+  margin-top: 5px;
+  font-size: 12px;
+}
+.page-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 20px;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+.demo-note {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+}
+.preview-switch {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+  font-size: 12px;
+}
+.preview-switch a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.standalone-state {
+  max-width: 650px;
+  margin: 12vh auto;
+  padding: 24px;
+}
+@media (max-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-summary {
+    order: -1;
+  }
+}
