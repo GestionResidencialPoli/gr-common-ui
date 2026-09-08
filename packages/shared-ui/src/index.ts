@@ -8,3 +8,4 @@ export * from "./home/home-page";
 export * from "./auth/auth-layout";
 export * from "./auth/login-form";
 export * from "./profile/profile-form";
+export * from "./profile/change-password-form";
