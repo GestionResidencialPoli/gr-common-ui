@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { AuthLayout, Feedback, LoginForm, Skeleton, type LoginValues } from "@gr/shared-ui";
 import { content } from "@/config/content";
 import { AuthError } from "@/services/auth-service";
-import { isDemoMode } from "@/services";
 import { useAuth } from "./auth-provider";
 
 export function LoginScreen() {
@@ -45,7 +44,6 @@ export function LoginScreen() {
         <LoginForm labels={content.loginLabels} pending={pending} error={error} onSubmit={submit} />
       )}
       {sessionError && <Feedback error>{content.auth.failed}</Feedback>}
-      {isDemoMode && <p className="demo-note">{content.auth.demo}</p>}
     </AuthLayout>
   );
 }

@@ -68,11 +68,11 @@ El flujo es:
 
 `AuthProvider` se coloca en `app/layout.tsx`, por lo que el login y el perfil comparten el mismo usuario. Al cargar la aplicación, consulta `getSession`.
 
-`AuthenticatedShell` espera esa consulta y dirige a `/login` cuando no hay usuario. Mientras espera, muestra un `Skeleton`. Al cerrar sesión, elimina la sesión demo y vuelve al login.
+`AuthenticatedShell` espera esa consulta y dirige a `/login` cuando no hay usuario. Mientras espera, muestra un `Skeleton`. Al cerrar sesión, llama al backend y vuelve al login.
 
 **Esta comprobación es de navegación del frontend, no autorización de datos.** No hay información privada real ni protección de servidor en esta entrega. Cuando exista la API, el backend deberá validar sesiones y permisos en cada operación.
 
-## 5. Servicio de demostración
+## 5. Servicio de autenticación
 
 `services/auth-service.ts` define cuatro métodos:
 
@@ -85,19 +85,11 @@ interface AuthService {
 }
 ```
 
-`services/demo-auth-service.ts` implementa ese contrato sin llamadas de red. Acepta únicamente el usuario de demostración y guarda un indicador de sesión y el perfil en `sessionStorage`. No guarda la contraseña.
-
-Los cambios sobreviven a una recarga y a un cierre/inicio de sesión en la misma pestaña. No son datos de una cuenta real, no se comparten entre aplicaciones y no se garantiza persistencia al cerrar la pestaña. Para reiniciarlos se eliminan `gr-demo-session` y `gr-demo-profile` de Session Storage.
-
-El servicio recibe una función que entrega el almacenamiento. Esto permite importarlo sin acceder a `window` durante el renderizado del servidor y probarlo con almacenamiento en memoria.
-
-`services/index.ts` decide qué servicio utilizar. En desarrollo, el modo predeterminado es demo. Fuera de ese modo, el servicio usado es `services/real-auth-service.ts`. `NEXT_PUBLIC_AUTH_MODE=demo` permite una demostración explícita, incluso en una compilación de producción. Esa variable es pública y nunca debe contener secretos.
-
-`real-auth-service.ts` implementa `AuthService` contra `gr-user-microservice`: `login` llama a `POST /api/v1/auth/login`, `getSession` a `GET /api/v1/auth/me` (única forma de conocer identidad y rol, ya que el access token es `HttpOnly` y el login no devuelve cuerpo) y `logout` a `POST /api/v1/auth/logout`. `updateProfile` lanza `not_configured`: el backend todavía no expone un endpoint para editar el propio perfil.
+`services/real-auth-service.ts` implementa `AuthService` contra `gr-user-microservice`: `login` llama a `POST /api/v1/auth/login`, `getSession` a `GET /api/v1/auth/me` (única forma de conocer identidad y rol, ya que el access token es `HttpOnly` y el login no devuelve cuerpo) y `logout` a `POST /api/v1/auth/logout`. `updateProfile` lanza `not_configured`: el backend todavía no expone un endpoint para editar el propio perfil.
 
 Todas las llamadas pasan por `lib/http-client.ts`, que agrega el header `X-XSRF-TOKEN` en mutaciones, reintenta una vez tras `POST /api/v1/auth/refresh` si la petición recibe `401`, y notifica a los suscriptores de `onSessionExpired` (hoy solo `AuthProvider`) si el refresco también falla. El navegador nunca contacta al backend directamente: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` del lado del servidor, para que las cookies `SameSite=Strict` del backend viajen sin problemas de origen cruzado en cualquier entorno.
 
-`proxy.ts` (el archivo que reemplazó a `middleware.ts`) redirige a `/login` en toda ruta protegida cuando no hay cookie `access_token`; se desactiva en modo demo, que no usa cookies.
+`proxy.ts` (el archivo que reemplazó a `middleware.ts`) redirige a `/login` en toda ruta protegida cuando no hay cookie `access_token`.
 
 El contrato de `AuthService` se extendió con `AppUser = Profile & { roles: Role[] }` (en `services/auth-service.ts`, no en `@gr/shared-ui`) para que el frontend pueda proteger rutas por rol sin que la biblioteca compartida conozca roles.
 
@@ -177,9 +169,7 @@ No se publicó el paquete en ningún registro. La aplicación consumidora aporta
 
 ## 10. Verificación
 
-`tests/demo-auth.test.mjs` usa el runner integrado de Node para comprobar credenciales, sesión, persistencia, validación, protección de campos del perfil y almacenamiento bloqueado.
-
-`tests/e2e/community.spec.ts` usa Playwright para recorrer login, perfil, recarga y logout, comprobar los destinos y probar las dos configuraciones en escritorio y móvil. Guarda capturas dentro de `test-results`.
+`tests/e2e/community.spec.ts` usa Playwright para recorrer login, logout, comprobar los destinos y probar las dos configuraciones en escritorio y móvil. Requiere el backend activo y un usuario semilla. Guarda capturas dentro de `test-results`.
 
 Consulta `README.md` para los comandos de ejecución y la prueba manual.
 

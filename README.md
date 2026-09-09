@@ -14,43 +14,33 @@ pnpm install
 pnpm dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000). Si no hay sesión de demostración, la aplicación te lleva a `/login`.
-
-En desarrollo, el modo demo está activo de forma predeterminada. No necesitas backend ni archivo `.env.local` para probarlo. Si prefieres configurarlo explícitamente, copia `.env.example` a `.env.local` sin reemplazar una configuración existente.
-
-**Credenciales de demostración:**
-
-```text
-Correo: residente@demo.com
-Contraseña: Demo1234!
-```
-
-No son credenciales reales. La simulación guarda sesión y perfil únicamente en `sessionStorage` de la pestaña. No guarda contraseñas ni envía peticiones a un backend.
+Abre [http://localhost:3000](http://localhost:3000). Si no hay sesión válida en el backend, la aplicación te lleva a `/login`.
 
 ## Conectar con el backend real
 
-Con `NEXT_PUBLIC_AUTH_MODE` distinto de `demo` (o sin definir, en producción), la app deja de usar la simulación y llama al backend real (`gr-user-microservice`) a través de `services/real-auth-service.ts`.
+La app llama al backend real (`gr-user-microservice`) a través de `services/real-auth-service.ts`.
 
 El navegador nunca habla directamente con el backend: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` (por defecto `http://localhost:8080`) del lado del servidor de Next.js. Así, desde la perspectiva del navegador todo vive en un solo origen, lo que evita problemas de cookies `SameSite` entre dominios distintos en producción.
 
-`lib/http-client.ts` centraliza cada llamada: agrega el header `X-XSRF-TOKEN` en mutaciones (leyendo la cookie legible `XSRF-TOKEN`), reintenta una vez tras `POST /api/v1/auth/refresh` si una petición recibe `401`, y notifica a `AuthProvider` para cerrar la sesión localmente si el refresco también falla. `proxy.ts` redirige a `/login` cuando no hay cookie `access_token` en rutas protegidas (se desactiva automáticamente en modo demo, que no usa cookies).
+`lib/http-client.ts` centraliza cada llamada: agrega el header `X-XSRF-TOKEN` en mutaciones (leyendo la cookie legible `XSRF-TOKEN`), reintenta una vez tras `POST /api/v1/auth/refresh` si una petición recibe `401`, y notifica a `AuthProvider` para cerrar la sesión localmente si el refresco también falla. `proxy.ts` redirige a `/login` cuando no hay cookie `access_token` en rutas protegidas.
 
 `GET /api/v1/auth/me` es la única forma de conocer la identidad y el rol de la sesión activa: el access token es `HttpOnly` y el login no devuelve cuerpo.
 
 Para correr contra el backend real en local:
 
 ```powershell
-$env:NEXT_PUBLIC_AUTH_MODE = ""
 $env:BACKEND_API_URL = "http://localhost:8080"
 pnpm dev
 ```
+
+En el backend local, usa `COOKIE_SECURE=false` si estás ejecutando por `http://localhost`; de lo contrario el navegador no guardará las cookies de sesión.
 
 ## Probar manualmente
 
 1. Abre `/perfil` sin iniciar sesión: debes terminar en `/login`.
 2. Introduce una contraseña incorrecta: se muestra el error de acceso.
 3. Prueba el control **Mostrar / Ocultar** contraseña.
-4. Inicia sesión con los datos de demostración: aparece el home con tres módulos.
+4. Inicia sesión con un usuario válido del backend: aparece el home con tres módulos.
 5. Abre un módulo: aparece su pantalla informativa pendiente de implementación.
 6. Pulsa el nombre/avatar en el encabezado y luego **Editar perfil**.
 7. Cambia nombre y teléfono, guarda y recarga: los cambios permanecen en la pestaña y el encabezado usa el nuevo nombre.
@@ -59,8 +49,6 @@ pnpm dev
 10. Abre `/preview` y `/preview?variant=four`: comprueba tres y cuatro tarjetas, otra identidad y distintos radios/fondo sin cambiar componentes.
 11. Reduce el ancho del navegador: la navegación pasa a un desplegable y las tarjetas se apilan.
 12. Recorre formularios y navegación con Tab, Enter y Escape.
-
-Para reiniciar los datos demo, abre las herramientas del navegador → Application → Session Storage → el origen local, y elimina las claves `gr-demo-session` y `gr-demo-profile`. Recarga después.
 
 ## Estructura
 
@@ -75,8 +63,8 @@ features/
   auth/                    Estado de sesión y comportamiento de acceso
   profile/                 Guardado y mensajes del perfil
 lib/http-client.ts         Cliente HTTP: CSRF, reintento tras refresh, expiración de sesión
-proxy.ts                   Redirección a /login cuando no hay sesión (fuera del modo demo)
-services/                  Contrato de autenticación, simulación local y adaptador real
+proxy.ts                   Redirección a /login cuando no hay sesión
+services/                  Contrato de autenticación y adaptador del backend
 packages/shared-ui/        Biblioteca @gr/shared-ui
 docs/architecture.md       Explicación detallada del código y reutilización
 tests/                     Pruebas unitarias y de navegador
@@ -110,9 +98,9 @@ pnpm format:check
 pnpm build
 ```
 
-`pnpm test` ejecuta siete pruebas del servicio demo. `pnpm test:e2e` ejecuta tres recorridos en dos tamaños de pantalla, seis pruebas en total. Playwright usa Microsoft Edge en Windows. Si no está instalado, ejecuta `pnpm exec playwright install msedge`. En Linux/macOS instala Chromium con `pnpm exec playwright install chromium`.
+`pnpm test:e2e` ejecuta los recorridos contra el backend real. Playwright usa Microsoft Edge en Windows. Si no está instalado, ejecuta `pnpm exec playwright install msedge`. En Linux/macOS instala Chromium con `pnpm exec playwright install chromium`.
 
-Las pruebas de navegador arrancan Next.js en el puerto 3100. Pueden reutilizar un servidor ya iniciado en ese puerto; debe estar configurado en modo demo. Las capturas quedan en `test-results/` y los traces se conservan cuando una prueba falla. Esas carpetas no se versionan.
+Las pruebas de navegador arrancan Next.js en el puerto 3100 y requieren el backend activo con un usuario de prueba. Las capturas quedan en `test-results/` y los traces se conservan cuando una prueba falla. Esas carpetas no se versionan.
 
 Para aplicar el formato del proyecto:
 
@@ -127,17 +115,7 @@ pnpm build
 pnpm start
 ```
 
-Si no configuras el modo demo explícitamente, la compilación de producción llama al backend real a través de `BACKEND_API_URL`. `/preview` sigue mostrando los componentes de ejemplo.
-
-Para probar una compilación de demostración en PowerShell:
-
-```powershell
-$env:NEXT_PUBLIC_AUTH_MODE = "demo"
-pnpm build
-pnpm start
-```
-
-Las variables `NEXT_PUBLIC_*` se incorporan al compilar. Si cambias el modo, debes volver a compilar. La autenticación demo no debe usarse como protección de una aplicación real.
+La compilación de producción llama al backend real a través de `BACKEND_API_URL`. `/preview` sigue mostrando los componentes de ejemplo.
 
 ## Alcance pendiente
 

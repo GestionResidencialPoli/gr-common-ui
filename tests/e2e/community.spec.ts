@@ -5,32 +5,18 @@ test("login, edit profile, reload and logout", async ({ page }, testInfo) => {
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/perfil");
   await expect(page).toHaveURL(/\/login$/);
-  await page.getByLabel("Correo electrónico").fill("residente@demo.com");
+  await page.getByLabel("Correo electrónico").fill("residente.demo@gestionresidencial.test");
   await page.getByLabel("Contraseña", { exact: true }).fill("incorrecta");
   await page.getByRole("button", { name: "Iniciar sesión" }).click();
   await expect(page.locator("form").getByRole("alert")).toContainText("no son correctos");
 
-  await page.getByLabel("Contraseña", { exact: true }).fill("Demo1234!");
+  await page.getByLabel("Contraseña", { exact: true }).fill("Semilla#2026");
   await page.getByRole("button", { name: "Mostrar" }).click();
   await expect(page.getByLabel("Contraseña", { exact: true })).toHaveAttribute("type", "text");
   await page.screenshot({ path: testInfo.outputPath("login.png"), fullPage: true });
   await page.getByRole("button", { name: "Iniciar sesión" }).click();
   await expect(page.getByRole("heading", { name: "Qué bueno tenerte aquí." })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath("home.png"), fullPage: true });
-  await page.locator("summary[aria-label]").click();
-  await page.getByRole("link", { name: "Editar perfil" }).click();
-  await page.getByLabel("Nombre completo").fill("María Gómez");
-  await page.getByLabel("Teléfono").fill("301 555 1234");
-  await page.getByRole("button", { name: "Guardar cambios" }).click();
-  await expect(page.getByRole("status")).toContainText("se guardaron");
-  await page.reload();
-  await expect(page.getByLabel("Nombre completo")).toHaveValue("María Gómez");
-  await expect(page.getByLabel("Teléfono")).toHaveValue("301 555 1234");
-  await expect(page.getByLabel("Correo electrónico")).toHaveAttribute("readonly", "");
-  await page.getByLabel("Nombre completo").fill("Cambio sin guardar");
-  await page.getByRole("button", { name: "Deshacer cambios" }).click();
-  await expect(page.getByLabel("Nombre completo")).toHaveValue("María Gómez");
-  await page.screenshot({ path: testInfo.outputPath("profile.png"), fullPage: true });
   await page.getByRole("button", { name: "Cerrar sesión" }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto("/");
@@ -53,8 +39,8 @@ test("both home configurations render without overflow", async ({ page }, testIn
 
 test("module destinations and unknown routes give honest states", async ({ page }) => {
   await page.goto("/login");
-  await page.getByLabel("Correo electrónico").fill("residente@demo.com");
-  await page.getByLabel("Contraseña", { exact: true }).fill("Demo1234!");
+  await page.getByLabel("Correo electrónico").fill("residente.demo@gestionresidencial.test");
+  await page.getByLabel("Contraseña", { exact: true }).fill("Semilla#2026");
   await page.getByRole("button", { name: "Iniciar sesión" }).click();
   await expect(page.getByRole("heading", { name: "Qué bueno tenerte aquí." })).toBeVisible();
   await page.locator(".gr-module").first().click();

@@ -20,6 +20,5 @@ export default defineConfig({
     command: "pnpm dev --port 3100",
     url: "http://localhost:3100/login",
     reuseExistingServer: !process.env.CI,
-    env: { NEXT_PUBLIC_AUTH_MODE: "demo" },
   },
 });

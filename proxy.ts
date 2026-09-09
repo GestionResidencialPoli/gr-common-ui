@@ -4,17 +4,10 @@ import type { NextRequest } from "next/server";
 const PUBLIC_PATHS = new Set(["/login"]);
 const ACCESS_TOKEN_COOKIE = "access_token";
 
-function isDemoMode(): boolean {
-  return (
-    process.env.NEXT_PUBLIC_AUTH_MODE === "demo" ||
-    (!process.env.NEXT_PUBLIC_AUTH_MODE && process.env.NODE_ENV === "development")
-  );
-}
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (isDemoMode() || PUBLIC_PATHS.has(pathname) || pathname.startsWith("/preview")) {
+  if (PUBLIC_PATHS.has(pathname) || pathname.startsWith("/preview")) {
     return NextResponse.next();
   }
 
