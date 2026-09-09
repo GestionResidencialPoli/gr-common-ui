@@ -47,8 +47,8 @@ El backend se levanta desde `gr-user-microservice` con `docker compose up -d` y 
 4. Inicia sesión con un usuario semilla del backend: aparece el home con tres módulos.
 5. Abre un módulo: aparece su pantalla informativa pendiente de implementación.
 6. Pulsa el nombre/avatar en el encabezado y luego **Editar perfil**.
-7. Cambia nombre y teléfono, guarda y recarga: los cambios permanecen en la pestaña y el encabezado usa el nuevo nombre.
-8. Cambia un campo sin guardar y pulsa **Deshacer cambios**: vuelve al último valor guardado.
+7. El nombre y el correo aparecen en solo lectura, con la nota de quién los administra: el backend solo acepta cambios de teléfono.
+8. Cambia el teléfono, guarda y recarga: el cambio permanece. Cámbialo otra vez sin guardar y pulsa **Deshacer cambios**: vuelve al último valor guardado.
 9. Cierra sesión e intenta volver al home: la navegación te devuelve al login.
 10. Abre `/preview` y `/preview?variant=four`: comprueba tres y cuatro tarjetas, otra identidad y distintos radios/fondo sin cambiar componentes.
 11. Reduce el ancho del navegador: la navegación pasa a un desplegable y las tarjetas se apilan.

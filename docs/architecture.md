@@ -32,7 +32,7 @@ Aplicación Next.js
 | `home/home-page.tsx`            | Bienvenida y tarjetas generadas desde una lista de módulos          |
 | `auth/auth-layout.tsx`          | Composición visual de la pantalla de acceso                         |
 | `auth/login-form.tsx`           | Campos y envío de credenciales                                      |
-| `profile/profile-form.tsx`      | Edición del nombre y teléfono, con correo de solo lectura           |
+| `profile/profile-form.tsx`      | Edición del teléfono; nombre opcionalmente editable y correo fijo   |
 | `types.ts`                      | Contratos TypeScript compartidos                                    |
 | `styles.css`                    | Variables visuales y estilos adaptables                             |
 
@@ -109,7 +109,7 @@ El contrato de `AuthService` se extendió con `AppUser = Profile & { roles: Role
 
 ## 6. Edición del perfil
 
-`ProfileScreen` obtiene el usuario del contexto y se lo pasa a `ProfileForm`. El formulario solo envía nombre y teléfono. El correo se presenta como información de solo lectura.
+`ProfileScreen` obtiene el usuario del contexto y se lo pasa a `ProfileForm`. El correo siempre se presenta como información de solo lectura. El nombre lo es también en esta aplicación, porque `PATCH /api/v1/auth/me` solo acepta el teléfono; la biblioteca conserva el parámetro `nameEditable` para que otra aplicación con un backend que sí lo admita pueda habilitarlo sin bifurcar el componente.
 
 Al guardar, el servicio valida campos básicos, conserva identificador y correo, devuelve el perfil actualizado y el contexto actualiza también el encabezado. Se incrementa `revision` para que el formulario tome los datos guardados como su nuevo estado inicial. De esta manera, **Deshacer cambios** vuelve a la última versión guardada.
 
