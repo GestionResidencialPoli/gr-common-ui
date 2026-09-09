@@ -30,3 +30,14 @@ export type ProfileLabels = {
   pending: string;
   reset: string;
 };
+
+export type ChangePasswordValues = { currentPassword: string; newPassword: string };
+
+export type ChangePasswordLabels = {
+  currentPassword: string;
+  newPassword: string;
+  showPassword: string;
+  hidePassword: string;
+  submit: string;
+  pending: string;
+};

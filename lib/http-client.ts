@@ -1,7 +1,12 @@
 const CSRF_COOKIE = "XSRF-TOKEN";
 const CSRF_HEADER = "X-XSRF-TOKEN";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
-const AUTH_ENDPOINTS_WITHOUT_RETRY = ["/api/v1/auth/login", "/api/v1/auth/refresh"];
+const AUTH_ENDPOINTS_WITHOUT_RETRY = [
+  "/api/v1/auth/login",
+  "/api/v1/auth/refresh",
+  "/api/v1/auth/me/password",
+];
+const ENDPOINTS_WITH_BUSINESS_UNAUTHORIZED = ["/api/v1/auth/me/password"];
 
 export class ApiClientError extends Error {
   status: number;
@@ -74,7 +79,10 @@ export async function apiFetch<T = void>(
     if (refreshed) response = await fetch(path, request);
   }
 
-  if (response.status === 401) {
+  const isBusinessUnauthorized = ENDPOINTS_WITH_BUSINESS_UNAUTHORIZED.some((endpoint) =>
+    path.startsWith(endpoint),
+  );
+  if (response.status === 401 && !isBusinessUnauthorized) {
     sessionExpiredListeners.forEach((listener) => listener());
   }
 

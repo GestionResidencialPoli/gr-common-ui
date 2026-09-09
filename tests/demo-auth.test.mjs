@@ -92,3 +92,24 @@ test("reports blocked browser storage without pretending login succeeded", async
   });
   await assert.rejects(service.getSession(), { code: "storage_unavailable" });
 });
+
+test("exposes the demo apartment and role on the session", async () => {
+  const { service } = setup();
+  const user = await service.login({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
+  assert.deepEqual(user.roles, ["RESIDENTE"]);
+  assert.deepEqual(user.apartment, { torre: "A", numero: "101", tipoResidente: "PROPIETARIO" });
+});
+
+test("changePassword requires a session and the correct current password", async () => {
+  const { service } = setup();
+  await assert.rejects(
+    service.changePassword({ currentPassword: DEMO_PASSWORD, newPassword: "Otra123!" }),
+    { code: "not_authenticated" },
+  );
+  await service.login({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
+  await assert.rejects(
+    service.changePassword({ currentPassword: "wrong", newPassword: "Otra123!" }),
+    { code: "incorrect_current_password" },
+  );
+  await service.changePassword({ currentPassword: DEMO_PASSWORD, newPassword: "Otra123!" });
+});

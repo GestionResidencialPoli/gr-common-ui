@@ -10,6 +10,7 @@ const initialProfile: AppUser = {
   email: DEMO_EMAIL,
   phone: "300 123 4567",
   roles: ["RESIDENTE"],
+  apartment: { torre: "A", numero: "101", tipoResidente: "PROPIETARIO" },
 };
 
 type DemoStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -22,7 +23,8 @@ function isDemoProfile(value: unknown): value is AppUser {
     profile.email === DEMO_EMAIL &&
     typeof profile.name === "string" &&
     typeof profile.phone === "string" &&
-    Array.isArray(profile.roles)
+    Array.isArray(profile.roles) &&
+    "apartment" in profile
   );
 }
 
@@ -87,6 +89,11 @@ export function createDemoAuthService(getStorage: () => DemoStorage): AuthServic
       const updated = { ...current, name, phone };
       write(PROFILE_KEY, JSON.stringify(updated));
       return updated;
+    },
+    async changePassword({ currentPassword }) {
+      const current = await this.getSession();
+      if (!current) throw new AuthError("not_authenticated");
+      if (currentPassword !== DEMO_PASSWORD) throw new AuthError("incorrect_current_password");
     },
   };
 }

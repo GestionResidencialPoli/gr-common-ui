@@ -1,5 +1,11 @@
 import { apiFetch, ApiClientError } from "@/lib/http-client";
-import { AuthError, type AppUser, type AuthService, type Role } from "./auth-service";
+import {
+  AuthError,
+  type ApartmentSummary,
+  type AppUser,
+  type AuthService,
+  type Role,
+} from "./auth-service";
 
 type MeResponse = {
   id: number;
@@ -8,6 +14,7 @@ type MeResponse = {
   lastName: string;
   phone: string | null;
   roles: string[];
+  apartment: ApartmentSummary | null;
 };
 
 function toAppUser(me: MeResponse): AppUser {
@@ -17,6 +24,7 @@ function toAppUser(me: MeResponse): AppUser {
     email: me.email,
     phone: me.phone ?? "",
     roles: me.roles as Role[],
+    apartment: me.apartment,
   };
 }
 
@@ -46,8 +54,35 @@ export function createRealAuthService(): AuthService {
     async logout() {
       await apiFetch("/api/v1/auth/logout", { method: "POST" });
     },
-    async updateProfile() {
-      throw new AuthError("not_configured");
+    async updateProfile({ phone }) {
+      try {
+        const me = await apiFetch<MeResponse>("/api/v1/auth/me", {
+          method: "PATCH",
+          body: { phone },
+        });
+        return toAppUser(me);
+      } catch (error) {
+        if (error instanceof ApiClientError && error.status === 400) {
+          throw new AuthError("invalid_profile");
+        }
+        throw error;
+      }
+    },
+    async changePassword({ currentPassword, newPassword }) {
+      try {
+        await apiFetch("/api/v1/auth/me/password", {
+          method: "POST",
+          body: { currentPassword, newPassword },
+        });
+      } catch (error) {
+        if (error instanceof ApiClientError && error.status === 401) {
+          throw new AuthError("incorrect_current_password");
+        }
+        if (error instanceof ApiClientError && error.status === 400) {
+          throw new AuthError("weak_password");
+        }
+        throw error;
+      }
     },
   };
 }

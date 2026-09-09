@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { AppShell } from "@gr/shared-ui";
 import { HomeContent } from "@/components/home-content";
 import { content } from "@/config/content";
-import { modules, navigation, parkingModule } from "@/config/modules";
+import { modules, parkingModule, residenteNavigation } from "@/config/modules";
 
 export const metadata = { title: "Vista previa" };
 
@@ -33,7 +33,7 @@ export default async function PreviewPage({
     <div style={theme}>
       <AppShell
         brand={brand}
-        navigation={alternate ? [...navigation, parkingModule] : navigation}
+        navigation={alternate ? [...residenteNavigation, parkingModule] : residenteNavigation}
         activeId="home"
         user={{ name: content.preview.user, caption: content.preview.caption }}
         userMenuItems={[{ id: "login", label: content.auth.loginLink, href: "/login" }]}
