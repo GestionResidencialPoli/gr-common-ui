@@ -89,11 +89,13 @@ interface AuthService {
 
 El contrato, la implementación y el singleton `authService` viven en `services/auth-service.ts`. El contrato de errores está aparte, en `services/auth-error.ts`, sin ninguna dependencia: eso permite probarlo con el runner de Node sin arrastrar alias de rutas ni la biblioteca compartida.
 
-`authService` implementa `AuthService` contra `gr-user-microservice`: `login` llama a `POST /api/v1/auth/login`, `getSession` a `GET /api/v1/auth/me` (única forma de conocer identidad y rol, ya que el access token es `HttpOnly` y el login no devuelve cuerpo) y `logout` a `POST /api/v1/auth/logout`. `updateProfile` lanza `not_configured`: el backend todavía no expone un endpoint para editar el propio perfil.
+`authService` implementa `AuthService` contra `gr-user-microservice`: `login` llama a `POST /api/v1/auth/login`, `getSession` a `GET /api/v1/auth/me` (única forma de conocer identidad y rol, ya que el access token es `HttpOnly` y el login no devuelve cuerpo) y `logout` a `POST /api/v1/auth/logout`. `updateProfile` llama a `PATCH /api/v1/auth/me`, que hoy solo acepta el teléfono (`UpdateProfileRequest(phone)`): por eso el formulario de perfil recibe `nameEditable={false}` y muestra el nombre en modo lectura. Ofrecer un campo editable cuyo valor el backend descarta habría producido un éxito falso, con el nombre viejo de vuelta al recargar.
 
 Todas las llamadas pasan por `lib/http-client.ts`, que agrega el header `X-XSRF-TOKEN` en mutaciones, reintenta una vez tras `POST /api/v1/auth/refresh` si la petición recibe `401`, y notifica a los suscriptores de `onSessionExpired` (hoy solo `AuthProvider`) si el refresco también falla. El navegador nunca contacta al backend directamente: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` del lado del servidor, para que las cookies `SameSite=Strict` del backend viajen sin problemas de origen cruzado en cualquier entorno.
 
 `proxy.ts` (el archivo que reemplazó a `middleware.ts` en Next.js 16) redirige a `/login` en toda ruta protegida cuando no hay cookie `access_token`. Solo `/login` y `/preview` quedan públicas. Que el convenio esté activo se comprueba en la salida de `pnpm build`, que lo lista como `ƒ Proxy (Middleware)`.
+
+El mismo archivo atiende `/api/*` con otro propósito: borra las cabeceras `Origin` y `Referer` antes de que la reescritura las reenvíe al backend. El navegador es del mismo origen que el servidor Next, así que ese `Origin` describe la página, no un cliente remoto; reenviarlo hace que Spring evalúe CORS sobre una petición que en realidad es servidor a servidor y responda `403 Invalid CORS request` a todo `POST` cuando el puerto de desarrollo no está en `CORS_ALLOWED_ORIGINS`. Quitarlo deja el CORS del backend para quien sí lo llame directo y evita tener que enumerar cada puerto del frontend.
 
 ## 5.1 Errores y configuración
 

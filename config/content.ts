@@ -63,6 +63,7 @@ export const content = {
   },
   profileLabels: {
     name: "Nombre completo",
+    nameHelp: "El nombre lo registra la administración del conjunto y no se edita aquí.",
     email: "Correo electrónico",
     emailHelp: "El correo de acceso no se puede modificar desde este formulario.",
     phone: "Teléfono",

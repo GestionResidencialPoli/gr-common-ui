@@ -23,6 +23,7 @@ export type LoginLabels = {
 
 export type ProfileLabels = {
   name: string;
+  nameHelp: string;
   email: string;
   emailHelp: string;
   phone: string;

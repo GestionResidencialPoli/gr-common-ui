@@ -42,6 +42,7 @@ export function ProfileForm({
         maxLength={100}
         pattern={nameEditable ? ".*\\S.*" : undefined}
         readOnly={!nameEditable}
+        hint={nameEditable ? undefined : labels.nameHelp}
         disabled={pending}
       />
       <TextField

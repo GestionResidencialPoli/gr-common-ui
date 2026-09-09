@@ -24,7 +24,7 @@ Copia `.env.example` a `.env.local` si necesitas apuntar a un backend distinto d
 
 `services/auth-service.ts` contiene el contrato y la única implementación: habla con `gr-user-microservice` por HTTP.
 
-El navegador nunca habla directamente con el backend: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` (por defecto `http://localhost:8080`) del lado del servidor de Next.js. Así, desde la perspectiva del navegador todo vive en un solo origen, lo que evita problemas de cookies `SameSite` entre dominios distintos en producción.
+El navegador nunca habla directamente con el backend: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` (por defecto `http://localhost:8080`) del lado del servidor de Next.js. Así, desde la perspectiva del navegador todo vive en un solo origen, lo que evita problemas de cookies `SameSite` entre dominios distintos en producción. `proxy.ts` completa el reenvío borrando las cabeceras `Origin` y `Referer` de esas peticiones: son las del propio origen de la página, y si llegan al backend Spring evalúa CORS sobre una llamada servidor a servidor y responde `403 Invalid CORS request` a todo `POST` cuyo puerto no esté en `CORS_ALLOWED_ORIGINS`.
 
 `lib/http-client.ts` centraliza cada llamada: agrega el header `X-XSRF-TOKEN` en mutaciones (leyendo la cookie legible `XSRF-TOKEN`), reintenta una vez tras `POST /api/v1/auth/refresh` si una petición recibe `401`, y notifica a `AuthProvider` para cerrar la sesión localmente si el refresco también falla. `proxy.ts` redirige a `/login` cuando no hay cookie `access_token` en rutas protegidas. En Next.js 16 el convenio `middleware` quedó deprecado y se renombró a `proxy`: el archivo va en la raíz y exporta una función `proxy` con su `config.matcher`. El build lo confirma listándolo como `ƒ Proxy (Middleware)`.
 
@@ -67,7 +67,7 @@ features/
   auth/                    Estado de sesión y comportamiento de acceso
   profile/                 Guardado y mensajes del perfil
 lib/http-client.ts         Cliente HTTP: CSRF, reintento tras refresh, expiración de sesión
-proxy.ts                   Redirección a /login cuando no hay sesión
+proxy.ts                   Redirección a /login sin sesión y reenvío limpio de /api
 config/env.ts              Único punto de lectura de process.env
 services/                  Contrato de autenticación y su implementación contra el backend
 packages/shared-ui/        Biblioteca @gr/shared-ui

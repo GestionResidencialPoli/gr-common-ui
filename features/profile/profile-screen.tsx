@@ -83,6 +83,7 @@ export function ProfileScreen() {
             key={revision}
             initialValues={user}
             labels={content.profileLabels}
+            nameEditable={false}
             pending={pending}
             error={error}
             success={success}
