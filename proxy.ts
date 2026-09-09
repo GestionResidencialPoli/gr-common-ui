@@ -2,19 +2,29 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS = new Set(["/login"]);
+const PUBLIC_PREFIXES = ["/preview"];
 const ACCESS_TOKEN_COOKIE = "access_token";
+const API_PREFIX = "/api/";
 
-function isDemoMode(): boolean {
-  return (
-    process.env.NEXT_PUBLIC_AUTH_MODE === "demo" ||
-    (!process.env.NEXT_PUBLIC_AUTH_MODE && process.env.NODE_ENV === "development")
-  );
+function isPublic(pathname: string): boolean {
+  return PUBLIC_PATHS.has(pathname) || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
+function forwardToBackend(request: NextRequest) {
+  const headers = new Headers(request.headers);
+  headers.delete("origin");
+  headers.delete("referer");
+  return NextResponse.next({ request: { headers } });
 }
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (isDemoMode() || PUBLIC_PATHS.has(pathname) || pathname.startsWith("/preview")) {
+  if (pathname.startsWith(API_PREFIX)) {
+    return forwardToBackend(request);
+  }
+
+  if (isPublic(pathname)) {
     return NextResponse.next();
   }
 
@@ -26,5 +36,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|api|favicon.ico|.*\\..*).*)"],
+  matcher: ["/api/:path*", "/((?!_next|favicon.ico|.*\..*).*)"],
 };

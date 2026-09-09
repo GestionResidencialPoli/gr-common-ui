@@ -28,7 +28,6 @@ export const content = {
     title: "Bienvenido de nuevo",
     subtitle: "Ingresa tus datos para acceder a tu unidad.",
     footer: "Espacios compartidos. Una vida más simple.",
-    demo: "Demostración local: residente@demo.com · Demo1234! Los cambios se guardan solo en esta pestaña.",
     unavailable: "La conexión de acceso todavía no está configurada.",
     failed: "No se pudo iniciar sesión. Intenta nuevamente.",
     invalid: "El correo o la contraseña no son correctos.",
@@ -64,6 +63,7 @@ export const content = {
   },
   profileLabels: {
     name: "Nombre completo",
+    nameHelp: "El nombre lo registra la administración del conjunto y no se edita aquí.",
     email: "Correo electrónico",
     emailHelp: "El correo de acceso no se puede modificar desde este formulario.",
     phone: "Teléfono",
