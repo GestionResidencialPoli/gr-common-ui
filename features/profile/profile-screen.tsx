@@ -10,9 +10,8 @@ import {
   type ProfileValues,
 } from "@gr/shared-ui";
 import { content } from "@/config/content";
-import { isDemoMode } from "@/services";
 import { useAuth } from "@/features/auth/auth-provider";
-import { AuthError } from "@/services/auth-service";
+import { authErrorMessage } from "@/services/auth-error-messages";
 
 export function ProfileScreen() {
   const { user, updateProfile, changePassword } = useAuth();
@@ -35,9 +34,11 @@ export function ProfileScreen() {
       setSuccess(content.profile.saved);
     } catch (error) {
       setError(
-        error instanceof AuthError && error.code === "invalid_profile"
-          ? content.profile.invalid
-          : content.profile.failed,
+        authErrorMessage(
+          error,
+          { invalid_profile: content.profile.invalid },
+          content.profile.failed,
+        ),
       );
     } finally {
       setPending(false);
@@ -53,11 +54,14 @@ export function ProfileScreen() {
       setPasswordSuccess(content.changePassword.saved);
     } catch (error) {
       setPasswordError(
-        error instanceof AuthError && error.code === "incorrect_current_password"
-          ? content.changePassword.incorrect
-          : error instanceof AuthError && error.code === "weak_password"
-            ? content.changePassword.weak
-            : content.changePassword.failed,
+        authErrorMessage(
+          error,
+          {
+            incorrect_current_password: content.changePassword.incorrect,
+            weak_password: content.changePassword.weak,
+          },
+          content.changePassword.failed,
+        ),
       );
     } finally {
       setPasswordPending(false);
@@ -83,7 +87,6 @@ export function ProfileScreen() {
             error={error}
             success={success}
             onSubmit={submit}
-            nameEditable={isDemoMode}
           />
         </Card>
         <Card className="profile-summary">

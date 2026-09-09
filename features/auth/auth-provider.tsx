@@ -3,8 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { ChangePasswordValues, LoginValues, ProfileValues } from "@gr/shared-ui";
 import { onSessionExpired } from "@/lib/http-client";
-import { authService } from "@/services";
-import type { AppUser } from "@/services/auth-service";
+import { authService, type AppUser } from "@/services/auth-service";
 
 type AuthContextValue = {
   user: AppUser | null;

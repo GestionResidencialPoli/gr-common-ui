@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { AuthLayout, Feedback, LoginForm, Skeleton, type LoginValues } from "@gr/shared-ui";
 import { content } from "@/config/content";
 import { homeRouteFor } from "@/lib/roles";
-import { AuthError } from "@/services/auth-service";
-import { isDemoMode } from "@/services";
+import { authErrorMessage } from "@/services/auth-error-messages";
 import { useAuth } from "./auth-provider";
 
 export function LoginScreen() {
@@ -27,11 +26,14 @@ export function LoginScreen() {
       router.replace(homeRouteFor(profile.roles));
     } catch (error) {
       setError(
-        error instanceof AuthError && error.code === "invalid_credentials"
-          ? content.auth.invalid
-          : error instanceof AuthError && error.code === "not_configured"
-            ? content.auth.unavailable
-            : content.auth.failed,
+        authErrorMessage(
+          error,
+          {
+            invalid_credentials: content.auth.invalid,
+            not_configured: content.auth.unavailable,
+          },
+          content.auth.failed,
+        ),
       );
     } finally {
       setPending(false);
@@ -46,7 +48,6 @@ export function LoginScreen() {
         <LoginForm labels={content.loginLabels} pending={pending} error={error} onSubmit={submit} />
       )}
       {sessionError && <Feedback error>{content.auth.failed}</Feedback>}
-      {isDemoMode && <p className="demo-note">{content.auth.demo}</p>}
     </AuthLayout>
   );
 }

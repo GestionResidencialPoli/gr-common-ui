@@ -1,16 +1,17 @@
 import { expect, test } from "@playwright/test";
+import { env } from "../../config/env";
 
 test("login, edit profile, reload and logout", async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/perfil");
   await expect(page).toHaveURL(/\/login$/);
-  await page.getByLabel("Correo electrónico").fill("residente@demo.com");
+  await page.getByLabel("Correo electrónico").fill(env.e2e.email);
   await page.getByLabel("Contraseña", { exact: true }).fill("incorrecta");
   await page.getByRole("button", { name: "Iniciar sesión" }).click();
   await expect(page.locator("form").getByRole("alert")).toContainText("no son correctos");
 
-  await page.getByLabel("Contraseña", { exact: true }).fill("Demo1234!");
+  await page.getByLabel("Contraseña", { exact: true }).fill(env.e2e.password);
   await page.getByRole("button", { name: "Mostrar" }).click();
   await expect(page.getByLabel("Contraseña", { exact: true })).toHaveAttribute("type", "text");
   await page.screenshot({ path: testInfo.outputPath("login.png"), fullPage: true });
@@ -53,8 +54,8 @@ test("both home configurations render without overflow", async ({ page }, testIn
 
 test("module destinations and unknown routes give honest states", async ({ page }) => {
   await page.goto("/login");
-  await page.getByLabel("Correo electrónico").fill("residente@demo.com");
-  await page.getByLabel("Contraseña", { exact: true }).fill("Demo1234!");
+  await page.getByLabel("Correo electrónico").fill(env.e2e.email);
+  await page.getByLabel("Contraseña", { exact: true }).fill(env.e2e.password);
   await page.getByRole("button", { name: "Iniciar sesión" }).click();
   await expect(page.getByRole("heading", { name: "Qué bueno tenerte aquí." })).toBeVisible();
   await page.locator(".gr-module").first().click();
