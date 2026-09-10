@@ -2,13 +2,20 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AppShell, Button, Feedback, Skeleton } from "@gr/shared-ui";
+import { AppShell, Button, EmptyState, Feedback, Skeleton } from "@gr/shared-ui";
 import { content } from "@/config/content";
-import { navigation } from "@/config/modules";
+import { navigationFor } from "@/config/modules";
+import { homeRouteFor } from "@/lib/roles";
+import type { Role } from "@/services/auth-service";
 import { useAuth } from "./auth-provider";
 
-// This guard only manages frontend navigation. The backend must authorize data.
-export function AuthenticatedShell({ children }: { children: ReactNode }) {
+export function AuthenticatedShell({
+  children,
+  requiredRole,
+}: {
+  children: ReactNode;
+  requiredRole?: Role;
+}) {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -38,11 +45,15 @@ export function AuthenticatedShell({ children }: { children: ReactNode }) {
         <Skeleton label={content.auth.loading} />
       </div>
     );
+
+  const homeHref = homeRouteFor(user.roles);
+  const navigation = navigationFor(user.roles);
   const activeId = navigation.find((item) => item.href === pathname)?.id;
+  const hasAccess = !requiredRole || user.roles.includes(requiredRole);
 
   return (
     <AppShell
-      brand={content.brand}
+      brand={{ ...content.brand, href: homeHref }}
       navigation={navigation}
       activeId={activeId}
       user={{ name: user.name, caption: content.profile.caption }}
@@ -56,7 +67,18 @@ export function AuthenticatedShell({ children }: { children: ReactNode }) {
       }
     >
       {error && <Feedback error>{content.auth.logoutError}</Feedback>}
-      {children}
+      {hasAccess ? (
+        children
+      ) : (
+        <EmptyState
+          title={content.accessDenied.title}
+          description={content.accessDenied.description}
+        >
+          <a className="gr-button gr-button--secondary" href={homeHref}>
+            {content.accessDenied.back}
+          </a>
+        </EmptyState>
+      )}
       <footer className="page-footer">
         <span>{content.footer.left}</span>
         <span>{content.footer.right}</span>

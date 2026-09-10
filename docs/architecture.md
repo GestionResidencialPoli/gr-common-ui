@@ -32,7 +32,7 @@ Aplicación Next.js
 | `home/home-page.tsx`            | Bienvenida y tarjetas generadas desde una lista de módulos          |
 | `auth/auth-layout.tsx`          | Composición visual de la pantalla de acceso                         |
 | `auth/login-form.tsx`           | Campos y envío de credenciales                                      |
-| `profile/profile-form.tsx`      | Edición del nombre y teléfono, con correo de solo lectura           |
+| `profile/profile-form.tsx`      | Edición del teléfono; nombre opcionalmente editable y correo fijo   |
 | `types.ts`                      | Contratos TypeScript compartidos                                    |
 | `styles.css`                    | Variables visuales y estilos adaptables                             |
 
@@ -68,7 +68,7 @@ El flujo es:
 
 `AuthProvider` se coloca en `app/layout.tsx`, por lo que el login y el perfil comparten el mismo usuario. Al cargar la aplicación, consulta `getSession`.
 
-`AuthenticatedShell` espera esa consulta y dirige a `/login` cuando no hay usuario. Mientras espera, muestra un `Skeleton`. Al cerrar sesión, llama al backend y vuelve al login.
+`AuthenticatedShell` espera esa consulta y dirige a `/login` cuando no hay usuario. Mientras espera, muestra un `Skeleton`. Al cerrar sesión, invoca `POST /api/v1/auth/logout` para que el backend revoque el refresh token y vuelve al login.
 
 **Esta comprobación es de navegación del frontend, no autorización de datos.** No hay información privada real ni protección de servidor en esta entrega. Cuando exista la API, el backend deberá validar sesiones y permisos en cada operación.
 
@@ -85,17 +85,31 @@ interface AuthService {
 }
 ```
 
-`services/real-auth-service.ts` implementa `AuthService` contra `gr-user-microservice`: `login` llama a `POST /api/v1/auth/login`, `getSession` a `GET /api/v1/auth/me` (única forma de conocer identidad y rol, ya que el access token es `HttpOnly` y el login no devuelve cuerpo) y `logout` a `POST /api/v1/auth/logout`. `updateProfile` lanza `not_configured`: el backend todavía no expone un endpoint para editar el propio perfil.
+**Hay una sola implementación, y habla con el backend real.** No existe simulación ni variable de modo: el flujo que se ejerce en desarrollo, en las pruebas y en producción es el mismo. Una implementación falsa habría dejado sin ejercitar justo el camino que puede romperse.
+
+El contrato, la implementación y el singleton `authService` viven en `services/auth-service.ts`. El contrato de errores está aparte, en `services/auth-error.ts`, sin ninguna dependencia: eso permite probarlo con el runner de Node sin arrastrar alias de rutas ni la biblioteca compartida.
+
+`authService` implementa `AuthService` contra `gr-user-microservice`: `login` llama a `POST /api/v1/auth/login`, `getSession` a `GET /api/v1/auth/me` (única forma de conocer identidad y rol, ya que el access token es `HttpOnly` y el login no devuelve cuerpo) y `logout` a `POST /api/v1/auth/logout`. `updateProfile` llama a `PATCH /api/v1/auth/me`, que hoy solo acepta el teléfono (`UpdateProfileRequest(phone)`): por eso el formulario de perfil recibe `nameEditable={false}` y muestra el nombre en modo lectura. Ofrecer un campo editable cuyo valor el backend descarta habría producido un éxito falso, con el nombre viejo de vuelta al recargar.
 
 Todas las llamadas pasan por `lib/http-client.ts`, que agrega el header `X-XSRF-TOKEN` en mutaciones, reintenta una vez tras `POST /api/v1/auth/refresh` si la petición recibe `401`, y notifica a los suscriptores de `onSessionExpired` (hoy solo `AuthProvider`) si el refresco también falla. El navegador nunca contacta al backend directamente: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` del lado del servidor, para que las cookies `SameSite=Strict` del backend viajen sin problemas de origen cruzado en cualquier entorno.
 
-`proxy.ts` (el archivo que reemplazó a `middleware.ts`) redirige a `/login` en toda ruta protegida cuando no hay cookie `access_token`.
+`proxy.ts` (el archivo que reemplazó a `middleware.ts` en Next.js 16) redirige a `/login` en toda ruta protegida cuando no hay cookie `access_token`. Solo `/login` y `/preview` quedan públicas. Que el convenio esté activo se comprueba en la salida de `pnpm build`, que lo lista como `ƒ Proxy (Middleware)`.
+
+El mismo archivo atiende `/api/*` con otro propósito: borra las cabeceras `Origin` y `Referer` antes de que la reescritura las reenvíe al backend. El navegador es del mismo origen que el servidor Next, así que ese `Origin` describe la página, no un cliente remoto; reenviarlo hace que Spring evalúe CORS sobre una petición que en realidad es servidor a servidor y responda `403 Invalid CORS request` a todo `POST` cuando el puerto de desarrollo no está en `CORS_ALLOWED_ORIGINS`. Quitarlo deja el CORS del backend para quien sí lo llame directo y evita tener que enumerar cada puerto del frontend.
+
+## 5.1 Errores y configuración
+
+Dos decisiones que evitan cadenas literales dispersas por las pantallas:
+
+`services/auth-error-messages.ts` expone `authErrorMessage(error, messages, fallback)`. Cada pantalla declara el mapa de los códigos que le interesan y su texto, y el resto cae al mensaje genérico. Las claves son de tipo `AuthErrorCode`, así que renombrar un código rompe la compilación en cada punto de uso en lugar de degradarse en silencio a un mensaje equivocado.
+
+`config/env.ts` es el único lugar que lee `process.env`. Resuelve todo al cargar el módulo, no en el momento del acceso, para que el valor no dependa de cuándo se consulte. Lo consumen `next.config.ts`, `playwright.config.ts` y las pruebas E2E.
 
 El contrato de `AuthService` se extendió con `AppUser = Profile & { roles: Role[] }` (en `services/auth-service.ts`, no en `@gr/shared-ui`) para que el frontend pueda proteger rutas por rol sin que la biblioteca compartida conozca roles.
 
 ## 6. Edición del perfil
 
-`ProfileScreen` obtiene el usuario del contexto y se lo pasa a `ProfileForm`. El formulario solo envía nombre y teléfono. El correo se presenta como información de solo lectura.
+`ProfileScreen` obtiene el usuario del contexto y se lo pasa a `ProfileForm`. El correo siempre se presenta como información de solo lectura. El nombre lo es también en esta aplicación, porque `PATCH /api/v1/auth/me` solo acepta el teléfono; la biblioteca conserva el parámetro `nameEditable` para que otra aplicación con un backend que sí lo admita pueda habilitarlo sin bifurcar el componente.
 
 Al guardar, el servicio valida campos básicos, conserva identificador y correo, devuelve el perfil actualizado y el contexto actualiza también el encabezado. Se incrementa `revision` para que el formulario tome los datos guardados como su nuevo estado inicial. De esta manera, **Deshacer cambios** vuelve a la última versión guardada.
 
@@ -169,7 +183,9 @@ No se publicó el paquete en ningún registro. La aplicación consumidora aporta
 
 ## 10. Verificación
 
-`tests/e2e/community.spec.ts` usa Playwright para recorrer login, logout, comprobar los destinos y probar las dos configuraciones en escritorio y móvil. Requiere el backend activo y un usuario semilla. Guarda capturas dentro de `test-results`.
+`tests/auth-error-messages.test.mjs` y `tests/env.test.mjs` usan el runner integrado de Node, sin red ni navegador: el mapeo de códigos de error a mensajes con sus casos de reserva, y la resolución de variables de entorno incluyendo valores vacíos y la precedencia entre puerto y URL base.
+
+`tests/e2e/community.spec.ts` usa Playwright para recorrer login, perfil, recarga y logout, comprobar los destinos y probar las dos configuraciones en escritorio y móvil. Guarda capturas dentro de `test-results`. **Requiere el backend activo con sus datos semilla**, y toma las credenciales de `E2E_USER_EMAIL` y `E2E_USER_PASSWORD` para no fijarlas en el código.
 
 Consulta `README.md` para los comandos de ejecución y la prueba manual.
 

@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthLayout, Feedback, LoginForm, Skeleton, type LoginValues } from "@gr/shared-ui";
 import { content } from "@/config/content";
-import { AUTH_ERROR, AuthError } from "@/services/auth-service";
+import { homeRouteFor } from "@/lib/roles";
+import { AUTH_ERROR } from "@/services/auth-service";
+import { authErrorMessage } from "@/services/auth-error-messages";
 import { useAuth } from "./auth-provider";
 
 export function LoginScreen() {
@@ -14,20 +16,24 @@ export function LoginScreen() {
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (!loading && user) router.replace("/");
+    if (!loading && user) router.replace(homeRouteFor(user.roles));
   }, [loading, user, router]);
 
   async function submit(values: LoginValues) {
     setPending(true);
     setError(undefined);
     try {
-      await login(values);
-      router.replace("/");
+      const profile = await login(values);
+      router.replace(homeRouteFor(profile.roles));
     } catch (error) {
       setError(
-        error instanceof AuthError && error.code === AUTH_ERROR.InvalidCredentials
-          ? content.auth.invalid
-          : content.auth.failed,
+        authErrorMessage(
+          error,
+          {
+            [AUTH_ERROR.InvalidCredentials]: content.auth.invalid,
+          },
+          content.auth.failed,
+        ),
       );
     } finally {
       setPending(false);

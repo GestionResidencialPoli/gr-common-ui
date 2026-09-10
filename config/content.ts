@@ -1,4 +1,3 @@
-// Application copy lives here. Shared components never decide these texts.
 export const content = {
   brand: { name: "Habitar", description: "Tu comunidad, en un lugar", mark: "h.", href: "/" },
   shell: {
@@ -58,10 +57,13 @@ export const content = {
     invalid: "Revisa el nombre y el teléfono antes de guardar.",
     link: "Editar perfil",
     caption: "Mi cuenta",
+    role: "Rol",
+    apartment: "Apartamento",
+    noApartment: "Sin apartamento asociado",
   },
   profileLabels: {
     name: "Nombre completo",
-    nameHelp: "El nombre no se puede modificar desde este formulario.",
+    nameHelp: "El nombre lo registra la administración del conjunto y no se edita aquí.",
     email: "Correo electrónico",
     emailHelp: "El correo de acceso no se puede modificar desde este formulario.",
     phone: "Teléfono",
@@ -70,11 +72,47 @@ export const content = {
     pending: "Guardando…",
     reset: "Deshacer cambios",
   },
+  roleLabels: {
+    RESIDENTE: "Residente",
+    VIGILANTE: "Vigilante",
+    ADMINISTRACION: "Administración",
+  },
+  residencyLabels: {
+    PROPIETARIO: "Propietario",
+    ARRENDATARIO: "Arrendatario",
+  },
+  changePassword: {
+    title: "Cambiar contraseña",
+    description: "Verifica tu contraseña actual para establecer una nueva.",
+    saved: "Tu contraseña se actualizó correctamente.",
+    failed: "No se pudo cambiar la contraseña. Intenta nuevamente.",
+    incorrect: "La contraseña actual no es correcta.",
+    weak: "La nueva contraseña no cumple los requisitos mínimos.",
+  },
+  changePasswordLabels: {
+    currentPassword: "Contraseña actual",
+    newPassword: "Nueva contraseña",
+    showPassword: "Mostrar",
+    hidePassword: "Ocultar",
+    submit: "Cambiar contraseña",
+    pending: "Guardando…",
+  },
   module: {
     eyebrow: "SERVICIOS DE TU COMUNIDAD",
     title: "Este espacio está por llegar",
     description: "Pronto encontrarás aquí el contenido de este servicio.",
     back: "Volver al inicio",
+  },
+  staffModule: {
+    eyebrow: "OPERACIÓN DE LA UNIDAD",
+    title: "Este espacio está por llegar",
+    description: "Pronto encontrarás aquí las herramientas de tu rol.",
+  },
+  accessDenied: {
+    eyebrow: "ACCESO RESTRINGIDO",
+    title: "No tienes acceso a esta sección",
+    description: "Esta área corresponde a otro rol dentro de la unidad.",
+    back: "Ir a mi espacio",
   },
   preview: {
     label: "Ejemplos de configuración",

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { LoginValues, ProfileValues } from "@gr/shared-ui";
+import type { ChangePasswordValues, LoginValues, ProfileValues } from "@gr/shared-ui";
 import { onSessionExpired } from "@/lib/http-client";
 import { authService, type AppUser } from "@/services/auth-service";
 
@@ -9,9 +9,10 @@ type AuthContextValue = {
   user: AppUser | null;
   loading: boolean;
   sessionError: boolean;
-  login: (values: LoginValues) => Promise<void>;
+  login: (values: LoginValues) => Promise<AppUser>;
   logout: () => Promise<void>;
   updateProfile: (values: ProfileValues) => Promise<void>;
+  changePassword: (values: ChangePasswordValues) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const profile = await authService.login(values);
     setUser(profile);
     setSessionError(false);
+    return profile;
   }
 
   async function logout() {
@@ -57,8 +59,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(profile);
   }
 
+  async function changePassword(values: ChangePasswordValues) {
+    await authService.changePassword(values);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, sessionError, login, logout, updateProfile }}>
+    <AuthContext.Provider
+      value={{ user, loading, sessionError, login, logout, updateProfile, changePassword }}
+    >
       {children}
     </AuthContext.Provider>
   );

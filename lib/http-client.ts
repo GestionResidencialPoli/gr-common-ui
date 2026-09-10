@@ -1,7 +1,13 @@
 const CSRF_COOKIE = "XSRF-TOKEN";
 const CSRF_HEADER = "X-XSRF-TOKEN";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
-const AUTH_ENDPOINTS_WITHOUT_RETRY = ["/api/v1/auth/login", "/api/v1/auth/refresh"];
+const AUTH_ENDPOINTS_WITHOUT_RETRY = [
+  "/api/v1/auth/login",
+  "/api/v1/auth/refresh",
+  "/api/v1/auth/me/password",
+];
+const ENDPOINTS_WITH_BUSINESS_UNAUTHORIZED = ["/api/v1/auth/login", "/api/v1/auth/me/password"];
+const CSRF_PRIMING_PATH = "/api/v1/auth/me";
 
 export class ApiClientError extends Error {
   status: number;
@@ -47,8 +53,16 @@ function buildRequest(
   return { ...init, method, headers, body, credentials: "include" };
 }
 
+async function ensureCsrfCookie(): Promise<string | null> {
+  const existing = readCookie(CSRF_COOKIE);
+  if (existing) return existing;
+
+  await fetch(CSRF_PRIMING_PATH, { method: "GET", credentials: "include" }).catch(() => undefined);
+  return readCookie(CSRF_COOKIE);
+}
+
 async function refreshSession(): Promise<boolean> {
-  const csrf = readCookie(CSRF_COOKIE);
+  const csrf = await ensureCsrfCookie();
   const response = await fetch("/api/v1/auth/refresh", {
     method: "POST",
     headers: csrf ? { [CSRF_HEADER]: csrf } : undefined,
@@ -62,6 +76,7 @@ export async function apiFetch<T = void>(
   init: Omit<RequestInit, "body"> & { body?: unknown } = {},
 ): Promise<T> {
   const method = (init.method ?? "GET").toUpperCase();
+  if (MUTATING_METHODS.has(method)) await ensureCsrfCookie();
   const request = buildRequest(method, init);
 
   let response = await fetch(path, request);
@@ -74,7 +89,10 @@ export async function apiFetch<T = void>(
     if (refreshed) response = await fetch(path, request);
   }
 
-  if (response.status === 401) {
+  const isBusinessUnauthorized = ENDPOINTS_WITH_BUSINESS_UNAUTHORIZED.some((endpoint) =>
+    path.startsWith(endpoint),
+  );
+  if (response.status === 401 && !isBusinessUnauthorized) {
     sessionExpiredListeners.forEach((listener) => listener());
   }
 

@@ -6,7 +6,7 @@ export default defineConfig({
   fullyParallel: true,
   workers: 2,
   use: {
-    baseURL: "http://localhost:3100",
+    baseURL: env.e2e.baseUrl,
     channel: process.platform === "win32" ? "msedge" : "chromium",
     trace: "retain-on-failure",
   },
@@ -18,8 +18,8 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["iPhone 13"], defaultBrowserType: "chromium" } },
   ],
   webServer: {
-    command: "pnpm dev --port 3100",
-    url: "http://localhost:3100/login",
-    reuseExistingServer: !env.isCi,
+    command: `pnpm dev --port ${env.e2e.port}`,
+    url: `${env.e2e.baseUrl}/login`,
+    reuseExistingServer: !env.isCI,
   },
 });
