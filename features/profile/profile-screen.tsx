@@ -11,6 +11,7 @@ import {
 } from "@gr/shared-ui";
 import { content } from "@/config/content";
 import { useAuth } from "@/features/auth/auth-provider";
+import { AUTH_ERROR } from "@/services/auth-service";
 import { authErrorMessage } from "@/services/auth-error-messages";
 
 export function ProfileScreen() {
@@ -36,7 +37,7 @@ export function ProfileScreen() {
       setError(
         authErrorMessage(
           error,
-          { invalid_profile: content.profile.invalid },
+          { [AUTH_ERROR.InvalidProfile]: content.profile.invalid },
           content.profile.failed,
         ),
       );
@@ -57,8 +58,8 @@ export function ProfileScreen() {
         authErrorMessage(
           error,
           {
-            incorrect_current_password: content.changePassword.incorrect,
-            weak_password: content.changePassword.weak,
+            [AUTH_ERROR.IncorrectCurrentPassword]: content.changePassword.incorrect,
+            [AUTH_ERROR.WeakPassword]: content.changePassword.weak,
           },
           content.changePassword.failed,
         ),

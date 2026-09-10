@@ -61,7 +61,12 @@ export function ProfileForm({
         defaultValue={initialValues.phone}
         type="tel"
         autoComplete="tel"
-        maxLength={30}
+        inputMode="numeric"
+        required
+        minLength={10}
+        maxLength={10}
+        pattern="\d{10}"
+        hint={labels.phoneHelp}
         disabled={pending}
       />
       {children}

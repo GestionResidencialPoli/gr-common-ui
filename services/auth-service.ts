@@ -1,9 +1,11 @@
 import { apiFetch, ApiClientError } from "@/lib/http-client";
-import { AuthError } from "./auth-error.ts";
+import { AuthError, AUTH_ERROR } from "./auth-error.ts";
 import type { ChangePasswordValues, LoginValues, Profile, ProfileValues } from "@gr/shared-ui";
 
-export { AuthError } from "./auth-error.ts";
+export { AUTH_ERROR, AuthError } from "./auth-error.ts";
 export type { AuthErrorCode } from "./auth-error.ts";
+
+const PHONE_PATTERN = /^\d{10}$/;
 
 export type Role = "RESIDENTE" | "VIGILANTE" | "ADMINISTRACION";
 export type TipoResidente = "PROPIETARIO" | "ARRENDATARIO";
@@ -55,7 +57,7 @@ function createAuthService(): AuthService {
         await apiFetch("/api/v1/auth/login", { method: "POST", body: { email, password } });
       } catch (error) {
         if (error instanceof ApiClientError && error.status === 401) {
-          throw new AuthError("invalid_credentials");
+          throw new AuthError(AUTH_ERROR.InvalidCredentials);
         }
         throw error;
       }
@@ -66,15 +68,20 @@ function createAuthService(): AuthService {
       await apiFetch("/api/v1/auth/logout", { method: "POST" });
     },
     async updateProfile({ phone }) {
+      const normalizedPhone = phone.trim();
+      if (!PHONE_PATTERN.test(normalizedPhone)) throw new AuthError(AUTH_ERROR.InvalidProfile);
+
       try {
-        const me = await apiFetch<MeResponse>("/api/v1/auth/me", {
+        const me = await apiFetch<MeResponse | void>("/api/v1/auth/me", {
           method: "PATCH",
-          body: { phone },
+          body: { phone: normalizedPhone },
         });
-        return toAppUser(me);
+        if (me) return toAppUser(me);
+        const refreshedProfile = await apiFetch<MeResponse>("/api/v1/auth/me");
+        return toAppUser(refreshedProfile);
       } catch (error) {
         if (error instanceof ApiClientError && error.status === 400) {
-          throw new AuthError("invalid_profile");
+          throw new AuthError(AUTH_ERROR.InvalidProfile);
         }
         throw error;
       }
@@ -87,10 +94,10 @@ function createAuthService(): AuthService {
         });
       } catch (error) {
         if (error instanceof ApiClientError && error.status === 401) {
-          throw new AuthError("incorrect_current_password");
+          throw new AuthError(AUTH_ERROR.IncorrectCurrentPassword);
         }
         if (error instanceof ApiClientError && error.status === 400) {
-          throw new AuthError("weak_password");
+          throw new AuthError(AUTH_ERROR.WeakPassword);
         }
         throw error;
       }

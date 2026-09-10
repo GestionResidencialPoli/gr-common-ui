@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AuthLayout, Feedback, LoginForm, Skeleton, type LoginValues } from "@gr/shared-ui";
 import { content } from "@/config/content";
 import { homeRouteFor } from "@/lib/roles";
+import { AUTH_ERROR } from "@/services/auth-service";
 import { authErrorMessage } from "@/services/auth-error-messages";
 import { useAuth } from "./auth-provider";
 
@@ -29,8 +30,7 @@ export function LoginScreen() {
         authErrorMessage(
           error,
           {
-            invalid_credentials: content.auth.invalid,
-            not_configured: content.auth.unavailable,
+            [AUTH_ERROR.InvalidCredentials]: content.auth.invalid,
           },
           content.auth.failed,
         ),

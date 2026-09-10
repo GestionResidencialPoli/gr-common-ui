@@ -27,6 +27,7 @@ export type ProfileLabels = {
   email: string;
   emailHelp: string;
   phone: string;
+  phoneHelp?: string;
   submit: string;
   pending: string;
   reset: string;
