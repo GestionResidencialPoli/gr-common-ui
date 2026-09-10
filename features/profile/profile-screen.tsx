@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Avatar, Card, ProfileForm, type ProfileValues } from "@gr/shared-ui";
 import { content } from "@/config/content";
 import { useAuth } from "@/features/auth/auth-provider";
-import { AuthError } from "@/services/auth-service";
+import { AUTH_ERROR, AuthError } from "@/services/auth-service";
 
 export function ProfileScreen() {
   const { user, updateProfile } = useAuth();
@@ -23,7 +23,7 @@ export function ProfileScreen() {
       setSuccess(content.profile.saved);
     } catch (error) {
       setError(
-        error instanceof AuthError && error.code === "invalid_profile"
+        error instanceof AuthError && error.code === AUTH_ERROR.InvalidProfile
           ? content.profile.invalid
           : content.profile.failed,
       );

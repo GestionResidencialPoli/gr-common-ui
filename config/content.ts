@@ -61,9 +61,11 @@ export const content = {
   },
   profileLabels: {
     name: "Nombre completo",
+    nameHelp: "El nombre no se puede modificar desde este formulario.",
     email: "Correo electrónico",
     emailHelp: "El correo de acceso no se puede modificar desde este formulario.",
     phone: "Teléfono",
+    phoneHelp: "Debe tener 10 dígitos, por ejemplo 3126222069.",
     submit: "Guardar cambios",
     pending: "Guardando…",
     reset: "Deshacer cambios",

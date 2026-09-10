@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthLayout, Feedback, LoginForm, Skeleton, type LoginValues } from "@gr/shared-ui";
 import { content } from "@/config/content";
-import { AuthError } from "@/services/auth-service";
+import { AUTH_ERROR, AuthError } from "@/services/auth-service";
 import { useAuth } from "./auth-provider";
 
 export function LoginScreen() {
@@ -25,11 +25,9 @@ export function LoginScreen() {
       router.replace("/");
     } catch (error) {
       setError(
-        error instanceof AuthError && error.code === "invalid_credentials"
+        error instanceof AuthError && error.code === AUTH_ERROR.InvalidCredentials
           ? content.auth.invalid
-          : error instanceof AuthError && error.code === "not_configured"
-            ? content.auth.unavailable
-            : content.auth.failed,
+          : content.auth.failed,
       );
     } finally {
       setPending(false);
