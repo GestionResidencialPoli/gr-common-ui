@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { env } from "./config/env";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -19,6 +20,6 @@ export default defineConfig({
   webServer: {
     command: "pnpm dev --port 3100",
     url: "http://localhost:3100/login",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !env.isCi,
   },
 });
