@@ -28,7 +28,6 @@ export const content = {
     title: "Bienvenido de nuevo",
     subtitle: "Ingresa tus datos para acceder a tu unidad.",
     footer: "Espacios compartidos. Una vida más simple.",
-    unavailable: "La conexión de acceso todavía no está configurada.",
     failed: "No se pudo iniciar sesión. Intenta nuevamente.",
     invalid: "El correo o la contraseña no son correctos.",
     logout: "Cerrar sesión",
