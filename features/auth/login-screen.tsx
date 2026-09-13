@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthLayout, Feedback, LoginForm, Skeleton, type LoginValues } from "@gr/shared-ui";
 import { content } from "@/config/content";
-import { homeRouteFor } from "@/lib/roles";
+import { redirectToHome } from "@/lib/roles";
 import { AUTH_ERROR } from "@/services/auth-service";
 import { authErrorMessage } from "@/services/auth-error-messages";
 import { useAuth } from "./auth-provider";
@@ -16,7 +16,7 @@ export function LoginScreen() {
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (!loading && user) router.replace(homeRouteFor(user.roles));
+    if (!loading && user) redirectToHome(user.roles, router.replace);
   }, [loading, user, router]);
 
   async function submit(values: LoginValues) {
@@ -24,7 +24,7 @@ export function LoginScreen() {
     setError(undefined);
     try {
       const profile = await login(values);
-      router.replace(homeRouteFor(profile.roles));
+      redirectToHome(profile.roles, router.replace);
     } catch (error) {
       setError(
         authErrorMessage(
