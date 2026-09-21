@@ -1,14 +1,41 @@
 {
-  "name": "@gr/shared-ui",
+  "name": "@gestionresidencial/shared-ui",
   "version": "0.1.0",
-  "private": true,
+  "description": "Biblioteca de componentes compartida para los frontends de Gestion Residencial.",
   "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
   "exports": {
-    ".": "./src/index.ts",
-    "./styles.css": "./src/styles.css"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "tsup && node ./scripts/copy-styles.mjs",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\""
   },
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tsup": "^8.5.0",
+    "typescript": "^5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GestionResidencialPoli/gr-common-ui.git",
+    "directory": "packages/shared-ui"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

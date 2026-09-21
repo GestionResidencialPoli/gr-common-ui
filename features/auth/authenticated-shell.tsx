@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AppShell, Button, EmptyState, Feedback, Skeleton } from "@gr/shared-ui";
+import { AppShell, Button, EmptyState, Feedback, Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { navigationFor } from "@/config/modules";
 import { homeRouteFor } from "@/lib/roles";

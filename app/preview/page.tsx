@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { AppShell } from "@gr/shared-ui";
+import { AppShell } from "@gestionresidencial/shared-ui";
 import { HomeContent } from "@/components/home-content";
 import { content } from "@/config/content";
 import { modules, parkingModule, residenteNavigation } from "@/config/modules";

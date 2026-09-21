@@ -8,7 +8,7 @@ import {
   ProfileForm,
   type ChangePasswordValues,
   type ProfileValues,
-} from "@gr/shared-ui";
+} from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { useAuth } from "@/features/auth/auth-provider";
 import { AUTH_ERROR } from "@/services/auth-service";

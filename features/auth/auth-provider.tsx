@@ -1,7 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { ChangePasswordValues, LoginValues, ProfileValues } from "@gr/shared-ui";
+import type {
+  ChangePasswordValues,
+  LoginValues,
+  ProfileValues,
+} from "@gestionresidencial/shared-ui";
 import { onSessionExpired } from "@/lib/http-client";
 import { authService, type AppUser } from "@/services/auth-service";
 
