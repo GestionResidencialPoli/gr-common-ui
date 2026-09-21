@@ -10,9 +10,9 @@ import {
   type LoginValues,
 } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
-import { homeRouteFor } from "@/lib/roles";
-import { AUTH_ERROR } from "@/services/auth-service";
-import { authErrorMessage } from "@/services/auth-error-messages";
+import { homeRouteFor } from "@gestionresidencial/auth-client";
+import { AUTH_ERROR } from "@gestionresidencial/auth-client";
+import { authErrorMessage } from "@gestionresidencial/auth-client";
 import { useAuth } from "./auth-provider";
 
 export function LoginScreen() {

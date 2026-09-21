@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
-import { homeRouteFor } from "@/lib/roles";
+import { homeRouteFor } from "@gestionresidencial/auth-client";
 import { useAuth } from "@/features/auth/auth-provider";
 
 export default function RootPage() {
