@@ -12,9 +12,9 @@ La biblioteca no importa archivos de `app`, `config`, `features` o `services`. T
 Aplicación Next.js
   config → textos, identidad, módulos y destinos
   features → comportamiento de login, sesión y perfil
-  services → contrato y simulación local
   app → rutas y composición
            ↓
+  @gestionresidencial/auth-client → sesión, CSRF, errores, roles y guard
   @gestionresidencial/shared-ui → presentación y formularios reutilizables
 ```
 
@@ -74,7 +74,7 @@ El flujo es:
 
 ## 5. Servicio de autenticación
 
-`services/auth-service.ts` define cuatro métodos:
+`auth-service`, en `@gestionresidencial/auth-client`, define cuatro métodos:
 
 ```ts
 interface AuthService {
@@ -87,13 +87,13 @@ interface AuthService {
 
 **Hay una sola implementación, y habla con el backend real.** No existe simulación ni variable de modo: el flujo que se ejerce en desarrollo, en las pruebas y en producción es el mismo. Una implementación falsa habría dejado sin ejercitar justo el camino que puede romperse.
 
-El contrato, la implementación y el singleton `authService` viven en `services/auth-service.ts`. El contrato de errores está aparte, en `services/auth-error.ts`, sin ninguna dependencia: eso permite probarlo con el runner de Node sin arrastrar alias de rutas ni la biblioteca compartida.
+El contrato, la implementación y el singleton `authService` viven en `packages/auth-client/src/auth-service.ts`. El contrato de errores está aparte, en `auth-error.ts` del mismo paquete, sin ninguna dependencia: eso permite probarlo con el runner de Node sin arrastrar alias de rutas ni la biblioteca compartida.
 
 `authService` implementa `AuthService` contra `gr-user-microservice`: `login` llama a `POST /api/v1/auth/login`, `getSession` a `GET /api/v1/auth/me` (única forma de conocer identidad y rol, ya que el access token es `HttpOnly` y el login no devuelve cuerpo) y `logout` a `POST /api/v1/auth/logout`. `updateProfile` llama a `PATCH /api/v1/auth/me`, que hoy solo acepta el teléfono (`UpdateProfileRequest(phone)`): por eso el formulario de perfil recibe `nameEditable={false}` y muestra el nombre en modo lectura. Ofrecer un campo editable cuyo valor el backend descarta habría producido un éxito falso, con el nombre viejo de vuelta al recargar.
 
-Todas las llamadas pasan por `lib/http-client.ts`, que agrega el header `X-XSRF-TOKEN` en mutaciones, reintenta una vez tras `POST /api/v1/auth/refresh` si la petición recibe `401`, y notifica a los suscriptores de `onSessionExpired` (hoy solo `AuthProvider`) si el refresco también falla. El navegador nunca contacta al backend directamente: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` del lado del servidor, para que las cookies `SameSite=Strict` del backend viajen sin problemas de origen cruzado en cualquier entorno.
+Todas las llamadas pasan por `http-client` de `@gestionresidencial/auth-client`, que agrega el header `X-XSRF-TOKEN` en mutaciones, reintenta una vez tras `POST /api/v1/auth/refresh` si la petición recibe `401`, y notifica a los suscriptores de `onSessionExpired` (hoy solo `AuthProvider`) si el refresco también falla. El navegador nunca contacta al backend directamente: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` del lado del servidor, para que las cookies `SameSite=Strict` del backend viajen sin problemas de origen cruzado en cualquier entorno.
 
-`proxy.ts` (el archivo que reemplazó a `middleware.ts` en Next.js 16) redirige a `/login` en toda ruta protegida cuando no hay cookie `access_token`. Solo `/login` y `/preview` quedan públicas. Que el convenio esté activo se comprueba en la salida de `pnpm build`, que lo lista como `ƒ Proxy (Middleware)`.
+`proxy.ts` (el archivo que reemplazó a `middleware.ts` en Next.js 16) traduce a `NextResponse` la decisión de `decideSessionAccess`, el guard de `@gestionresidencial/auth-client`: redirige a `/login` en toda ruta protegida cuando no hay cookie `access_token`. Solo `/login` y `/preview` quedan públicas, y esa lista la declara esta aplicación, no el paquete. Que el convenio esté activo se comprueba en la salida de `pnpm build`, que lo lista como `ƒ Proxy (Middleware)`.
 
 El mismo archivo atiende `/api/*` con otro propósito: borra las cabeceras `Origin` y `Referer` antes de que la reescritura las reenvíe al backend. El navegador es del mismo origen que el servidor Next, así que ese `Origin` describe la página, no un cliente remoto; reenviarlo hace que Spring evalúe CORS sobre una petición que en realidad es servidor a servidor y responda `403 Invalid CORS request` a todo `POST` cuando el puerto de desarrollo no está en `CORS_ALLOWED_ORIGINS`. Quitarlo deja el CORS del backend para quien sí lo llame directo y evita tener que enumerar cada puerto del frontend.
 
@@ -101,11 +101,11 @@ El mismo archivo atiende `/api/*` con otro propósito: borra las cabeceras `Orig
 
 Dos decisiones que evitan cadenas literales dispersas por las pantallas:
 
-`services/auth-error-messages.ts` expone `authErrorMessage(error, messages, fallback)`. Cada pantalla declara el mapa de los códigos que le interesan y su texto, y el resto cae al mensaje genérico. Las claves son de tipo `AuthErrorCode`, así que renombrar un código rompe la compilación en cada punto de uso en lugar de degradarse en silencio a un mensaje equivocado.
+`auth-error-messages`, en `@gestionresidencial/auth-client`, expone `authErrorMessage(error, messages, fallback)`. Cada pantalla declara el mapa de los códigos que le interesan y su texto, y el resto cae al mensaje genérico. Las claves son de tipo `AuthErrorCode`, así que renombrar un código rompe la compilación en cada punto de uso en lugar de degradarse en silencio a un mensaje equivocado.
 
 `config/env.ts` es el único lugar que lee `process.env`. Resuelve todo al cargar el módulo, no en el momento del acceso, para que el valor no dependa de cuándo se consulte. Lo consumen `next.config.ts`, `playwright.config.ts` y las pruebas E2E.
 
-El contrato de `AuthService` se extendió con `AppUser = Profile & { roles: Role[] }` (en `services/auth-service.ts`, no en `@gestionresidencial/shared-ui`) para que el frontend pueda proteger rutas por rol sin que la biblioteca compartida conozca roles.
+El contrato de `AuthService` se extendió con `AppUser = Profile & { roles: Role[] }` (en `@gestionresidencial/auth-client`, no en `@gestionresidencial/shared-ui`) para que el frontend pueda proteger rutas por rol sin que la biblioteca compartida conozca roles.
 
 ## 6. Edición del perfil
 
