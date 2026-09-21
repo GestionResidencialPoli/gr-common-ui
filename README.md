@@ -22,11 +22,11 @@ Copia `.env.example` a `.env.local` si necesitas apuntar a un backend distinto d
 
 ## Conexión con el backend
 
-`services/auth-service.ts` contiene el contrato y la única implementación: habla con `gr-user-microservice` por HTTP.
+`@gestionresidencial/auth-client` contiene el contrato y la única implementación: habla con `gr-user-microservice` por HTTP. Vive en `packages/auth-client/` y lo consumen todos los frontends.
 
 El navegador nunca habla directamente con el backend: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` (por defecto `http://localhost:8080`) del lado del servidor de Next.js. Así, desde la perspectiva del navegador todo vive en un solo origen, lo que evita problemas de cookies `SameSite` entre dominios distintos en producción. `proxy.ts` completa el reenvío borrando las cabeceras `Origin` y `Referer` de esas peticiones: son las del propio origen de la página, y si llegan al backend Spring evalúa CORS sobre una llamada servidor a servidor y responde `403 Invalid CORS request` a todo `POST` cuyo puerto no esté en `CORS_ALLOWED_ORIGINS`.
 
-`lib/http-client.ts` centraliza cada llamada: agrega el header `X-XSRF-TOKEN` en mutaciones (leyendo la cookie legible `XSRF-TOKEN`), reintenta una vez tras `POST /api/v1/auth/refresh` si una petición recibe `401`, y notifica a `AuthProvider` para cerrar la sesión localmente si el refresco también falla. `proxy.ts` redirige a `/login` cuando no hay cookie `access_token` en rutas protegidas. En Next.js 16 el convenio `middleware` quedó deprecado y se renombró a `proxy`: el archivo va en la raíz y exporta una función `proxy` con su `config.matcher`. El build lo confirma listándolo como `ƒ Proxy (Middleware)`.
+`http-client`, dentro de `@gestionresidencial/auth-client`, centraliza cada llamada: agrega el header `X-XSRF-TOKEN` en mutaciones (leyendo la cookie legible `XSRF-TOKEN`), reintenta una vez tras `POST /api/v1/auth/refresh` si una petición recibe `401`, y notifica a `AuthProvider` para cerrar la sesión localmente si el refresco también falla. `proxy.ts` redirige a `/login` cuando no hay cookie `access_token` en rutas protegidas. En Next.js 16 el convenio `middleware` quedó deprecado y se renombró a `proxy`: el archivo va en la raíz y exporta una función `proxy` con su `config.matcher`. El build lo confirma listándolo como `ƒ Proxy (Middleware)`.
 
 `GET /api/v1/auth/me` es la única forma de conocer la identidad y el rol de la sesión activa: el access token es `HttpOnly` y el login no devuelve cuerpo.
 
@@ -66,27 +66,27 @@ config/                    Textos, identidad y módulos de ejemplo
 features/
   auth/                    Estado de sesión y comportamiento de acceso
   profile/                 Guardado y mensajes del perfil
-lib/http-client.ts         Cliente HTTP: CSRF, reintento tras refresh, expiración de sesión
-proxy.ts                   Redirección a /login sin sesión y reenvío limpio de /api
+proxy.ts                   Traduce la decisión del guard compartido a NextResponse
 config/env.ts              Único punto de lectura de process.env
-services/                  Contrato de autenticación y su implementación contra el backend
 packages/shared-ui/        Biblioteca @gestionresidencial/shared-ui
+packages/auth-client/      Cliente de sesión @gestionresidencial/auth-client
 docs/architecture.md       Explicación detallada del código y reutilización
 tests/                     Pruebas unitarias y de navegador
 ```
 
 ## Qué modificar
 
-| Necesidad                                         | Archivo                             |
-| ------------------------------------------------- | ----------------------------------- |
-| Cambiar textos, etiquetas y nombre de la unidad   | `config/content.ts`                 |
-| Añadir módulos, cambiar sus textos o destinos     | `config/modules.tsx`                |
-| Cambiar el aspecto común                          | `packages/shared-ui/src/styles.css` |
-| Sobrescribir variables solo para esta app         | `app/globals.css`                   |
-| Componer otro contenido debajo de los accesos     | `components/home-content.tsx`       |
-| Consultar lo que deberá implementar la futura API | `services/auth-service.ts`          |
-| Seleccionar el futuro servicio real               | `services/index.ts`                 |
-| Consultar las exportaciones reutilizables         | `packages/shared-ui/src/index.ts`   |
+| Necesidad                                       | Archivo                                    |
+| ----------------------------------------------- | ------------------------------------------ |
+| Cambiar textos, etiquetas y nombre de la unidad | `config/content.ts`                        |
+| Añadir módulos, cambiar sus textos o destinos   | `config/modules.tsx`                       |
+| Cambiar el aspecto común                        | `packages/shared-ui/src/styles.css`        |
+| Sobrescribir variables solo para esta app       | `app/globals.css`                          |
+| Componer otro contenido debajo de los accesos   | `components/home-content.tsx`              |
+| Consultar el contrato de la API                 | `packages/auth-client/src/auth-service.ts` |
+| Cambiar rutas públicas o destino del login      | `proxy.ts`                                 |
+| Consultar las exportaciones reutilizables       | `packages/shared-ui/src/index.ts`          |
+| Consultar el cliente de sesión                  | `packages/auth-client/src/index.ts`        |
 
 Los botones de la biblioteca reciben sus textos mediante `children` o `labels`. Los nombres **Tablero**, **Administración** y **Zonas comunes** pertenecen a esta aplicación de ejemplo.
 
