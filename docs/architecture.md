@@ -151,7 +151,11 @@ El CSS compartido incluye un reset básico y estilos globales de tipografía. Es
 
 ## 9. Consumir la biblioteca desde otra aplicación
 
-En el mismo workspace, añade `"@gestionresidencial/shared-ui": "workspace:*"` a las dependencias del consumidor y ejecuta `pnpm install`.
+Los componentes viven en `@gestionresidencial/shared-ui` y la lógica de sesión en `@gestionresidencial/auth-client`. Ambos se publican como paquetes públicos en npmjs.com, así que cualquier repositorio los instala sin token ni `.npmrc`:
+
+```bash
+pnpm add @gestionresidencial/shared-ui @gestionresidencial/auth-client
+```
 
 Importa los estilos una sola vez en el layout raíz:
 
@@ -159,24 +163,19 @@ Importa los estilos una sola vez en el layout raíz:
 import "@gestionresidencial/shared-ui/styles.css";
 ```
 
-Después importa los componentes y tipos:
+Después los componentes y tipos:
 
 ```tsx
 import { AppShell, HomePage, LoginForm, ProfileForm } from "@gestionresidencial/shared-ui";
 ```
 
-El paquete se distribuye construido: ESM con declaraciones de tipos en `dist/`. El consumidor **no** necesita `transpilePackages`. Por eso `pnpm build`, `pnpm dev` y `pnpm typecheck` ejecutan antes `build:packages`: la app resuelve el paquete por su `exports`, que apunta a `dist/`.
+Los paquetes se distribuyen construidos: ESM con declaraciones de tipos. El consumidor **no** necesita `transpilePackages`.
 
-Para otro repositorio, mientras el paquete no esté publicado en un registro, puedes generar un tarball local:
+Dentro de este workspace, el consumidor declara `"workspace:*"` y `pnpm install` los enlaza a las carpetas locales. Por eso `pnpm build`, `pnpm dev` y `pnpm typecheck` ejecutan antes `build:packages`: la app resuelve el paquete por su `exports`, que apunta a `dist/`.
 
-```powershell
-pnpm --filter @gestionresidencial/shared-ui build
-pnpm --dir packages/shared-ui pack --pack-destination ../../artifacts
-```
+La aplicación consumidora aporta sus textos, sus destinos y sus rutas públicas. Ni `homeRouteFor` ni el guard de sesión fijan rutas: reciben las suyas por configuración, con valores por defecto que reproducen el comportamiento de esta aplicación.
 
-Instálalo desde el otro repositorio con `pnpm add <ruta-al-archivo.tgz>`. Es un puente, no el mecanismo definitivo: la publicación en npmjs.com es el destino y está descrita en [ADR-002](decisiones/ADR-002-distribucion-frontend.md).
-
-La aplicación consumidora aporta sus textos, destinos y adaptador de autenticación. Compartir componentes de login no comparte automáticamente una sesión entre dominios.
+Compartir componentes de login no comparte automáticamente una sesión entre dominios. Esa es la razón por la que los frontends se componen sobre un único origen; el razonamiento completo está en [ADR-002](decisiones/ADR-002-distribucion-frontend.md) y el procedimiento de release en [docs/publicacion.md](publicacion.md).
 
 ## 10. Verificación
 

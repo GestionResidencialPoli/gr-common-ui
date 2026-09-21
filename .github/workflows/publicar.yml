@@ -1,0 +1,61 @@
+name: Publicar paquetes
+
+# La publicacion ocurre solo desde main, que es el estado liberado segun el
+# flujo del equipo: feature/* -> develop -> qa -> release/* -> main.
+on:
+  push:
+    branches: [main]
+
+# Dos publicaciones simultaneas dejarian versiones a medio salir.
+concurrency:
+  group: publicar-paquetes
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write # requerido por npm provenance
+
+jobs:
+  publicar:
+    name: Versionar y publicar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener el repositorio
+        uses: actions/checkout@v4
+        with:
+          # Changesets compara contra el historial para saber que cambio.
+          fetch-depth: 0
+
+      - name: Preparar pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Construir los paquetes
+        run: pnpm build:packages
+
+      - name: Ejecutar pruebas
+        run: pnpm test
+
+      # Si hay changesets pendientes, abre un PR de version.
+      # Si no los hay y las versiones ya subieron, publica en npm.
+      - name: Versionar o publicar
+        uses: changesets/action@v1
+        with:
+          version: pnpm version-packages
+          publish: pnpm release
+          commit: "chore(release): versionar paquetes"
+          title: "chore(release): versionar paquetes"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
