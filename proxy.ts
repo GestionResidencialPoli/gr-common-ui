@@ -1,38 +1,40 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  ACCESS_TOKEN_COOKIE,
+  HEADERS_TO_STRIP_ON_FORWARD,
+  decideSessionAccess,
+} from "@gestionresidencial/auth-client";
 
-const PUBLIC_PATHS = new Set(["/login"]);
-const PUBLIC_PREFIXES = ["/preview"];
-const ACCESS_TOKEN_COOKIE = "access_token";
-const API_PREFIX = "/api/";
-
-function isPublic(pathname: string): boolean {
-  return PUBLIC_PATHS.has(pathname) || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
-}
+// Rutas publicas de esta aplicacion. Viven aqui, no en el paquete: cada
+// frontend tiene las suyas.
+const GUARD_CONFIG = {
+  publicPaths: ["/login"],
+  publicPrefixes: ["/preview"],
+  loginPath: "/login",
+};
 
 function forwardToBackend(request: NextRequest) {
   const headers = new Headers(request.headers);
-  headers.delete("origin");
-  headers.delete("referer");
+  HEADERS_TO_STRIP_ON_FORWARD.forEach((header) => headers.delete(header));
   return NextResponse.next({ request: { headers } });
 }
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const decision = decideSessionAccess(
+    request.nextUrl.pathname,
+    request.cookies.has(ACCESS_TOKEN_COOKIE),
+    GUARD_CONFIG,
+  );
 
-  if (pathname.startsWith(API_PREFIX)) {
-    return forwardToBackend(request);
+  switch (decision.type) {
+    case "forward-to-backend":
+      return forwardToBackend(request);
+    case "redirect":
+      return NextResponse.redirect(new URL(decision.to, request.url));
+    default:
+      return NextResponse.next();
   }
-
-  if (isPublic(pathname)) {
-    return NextResponse.next();
-  }
-
-  if (!request.cookies.has(ACCESS_TOKEN_COOKIE)) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  return NextResponse.next();
 }
 
 export const config = {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const { apiFetch, ApiClientError, onSessionExpired } = await import("../lib/http-client.ts");
+const { apiFetch, ApiClientError, onSessionExpired } = await import("../src/http-client.ts");
 
 function respondWith(status, body) {
   return {
