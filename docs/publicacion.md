@@ -53,11 +53,13 @@ Al fusionar el PR de versión, el mismo flujo publica en npm. No hay paso manual
 
 ## La primera publicación
 
-La publicación automática se dispara con un `push` a `main`, es decir al final del ciclo `develop → qa → release/* → main`. Para la primera versión eso dejaría a los frontends esperando un ciclo completo antes de poder instalar nada.
+La publicación se dispara con un `push` a `main`. Al llegar ahí el primer cambio, el flujo publica solo: no hay que hacer nada más.
 
-Por eso el flujo también acepta disparo manual: **Actions → Publicar paquetes → Run workflow**. Se usa una sola vez, de forma deliberada, para sacar la `0.1.0`. Después de eso, lo normal es dejar que corra solo al llegar a `main`.
+El flujo acepta además disparo manual (**Actions → Publicar paquetes → Run workflow**), pero **el job solo se ejecuta si la rama es `main`**. Correrlo desde otra rama termina sin publicar, a propósito: el job tiene permisos de escritura y credenciales de npm, y dejarlo correr desde cualquier rama permitiría publicar saltándose el flujo acordado. El disparo manual sirve para reintentar una publicación fallida sin tener que volver a fusionar, no para publicar desde una rama de trabajo.
 
-Antes de la primera publicación no hay changesets acumulados y eso es correcto: ambos paquetes están en `0.1.0` y salen con esa versión tal cual, sin bump. El flujo lo detecta y publica directo, sin abrir PR de versión.
+Ten en cuenta que el botón _Run workflow_ solo aparece si el archivo del flujo existe en la rama por defecto del repositorio, que es `main`.
+
+Antes de la primera publicación no hay changesets acumulados y eso es correcto: ambos paquetes están en `0.1.0` y salen con esa versión tal cual, sin bump. El flujo lo detecta y publica directo, sin abrir PR de versión. **No agregues un changeset vacío para "dejar constancia"**: `changesets/action` lo detecta como changeset presente, abre un PR de versión que no cambia nada y no publica.
 
 ## Credenciales
 

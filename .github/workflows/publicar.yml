@@ -25,6 +25,10 @@ jobs:
   publicar:
     name: Versionar y publicar
     runs-on: ubuntu-latest
+    # El disparo manual permite elegir cualquier rama. Sin esta guarda, una
+    # ejecucion desde una rama de trabajo publicaria con las credenciales de npm
+    # saltandose el flujo acordado. Solo main publica.
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Obtener el repositorio
         uses: actions/checkout@v4
@@ -53,14 +57,19 @@ jobs:
 
       # Si hay changesets pendientes, abre un PR de version.
       # Si no los hay y las versiones ya subieron, publica en npm.
+      # changesets/action@v2 es la linea compatible con Changesets v3, que es la
+      # version del CLI que instala este repositorio. v2 renombro los inputs y
+      # dejo de aceptar el token por variable de entorno.
       - name: Versionar o publicar
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          version: pnpm version-packages
-          publish: pnpm release
-          commit: "chore(release): versionar paquetes"
-          title: "chore(release): versionar paquetes"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version-script: pnpm version-packages
+          publish-script: pnpm release
+          commit-message: "chore(release): versionar paquetes"
+          pr-title: "chore(release): versionar paquetes"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # La autenticacion con npm la establece actions/setup-node mediante
+          # registry-url; v2 ya no escribe el .npmrc por su cuenta.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
