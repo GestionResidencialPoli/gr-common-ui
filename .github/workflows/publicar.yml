@@ -5,6 +5,11 @@ name: Publicar paquetes
 on:
   push:
     branches: [main]
+  # Disparo manual. Existe para la primera publicacion: los paquetes nunca se
+  # han publicado y esperar un ciclo completo develop -> qa -> release -> main
+  # dejaria bloqueados a los frontends que ya dependen de ellos.
+  # Uso normal: dejar que corra solo al llegar a main.
+  workflow_dispatch:
 
 # Dos publicaciones simultaneas dejarian versiones a medio salir.
 concurrency:

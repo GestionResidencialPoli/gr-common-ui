@@ -51,15 +51,26 @@ Revisarlo es revisar el changelog: que las versiones sean las esperadas y que lo
 
 Al fusionar el PR de versión, el mismo flujo publica en npm. No hay paso manual.
 
-## Qué se necesita configurar una sola vez
+## La primera publicación
 
-Estos pasos no están hechos todavía y bloquean la primera publicación:
+La publicación automática se dispara con un `push` a `main`, es decir al final del ciclo `develop → qa → release/* → main`. Para la primera versión eso dejaría a los frontends esperando un ciclo completo antes de poder instalar nada.
 
-1. **Crear la organización `gestionresidencial` en npmjs.com.** El scope está libre: ambos nombres responden 404 y no hay nada publicado bajo él. Quien la cree queda como propietario.
-2. **Generar un token de automatización** en npm (`Automation`, no `Publish`, para que funcione sin 2FA interactivo).
-3. **Guardarlo como secreto `NPM_TOKEN`** en el repositorio, en Settings → Secrets and variables → Actions.
+Por eso el flujo también acepta disparo manual: **Actions → Publicar paquetes → Run workflow**. Se usa una sola vez, de forma deliberada, para sacar la `0.1.0`. Después de eso, lo normal es dejar que corra solo al llegar a `main`.
 
-El token es una credencial: no debe aparecer en código, en un `.npmrc` versionado, ni en la descripción de un PR.
+Antes de la primera publicación no hay changesets acumulados y eso es correcto: ambos paquetes están en `0.1.0` y salen con esa versión tal cual, sin bump. El flujo lo detecta y publica directo, sin abrir PR de versión.
+
+## Credenciales
+
+El flujo necesita el secreto `NPM_TOKEN` del repositorio (Settings → Secrets and variables → Actions).
+
+npm retiró los tokens _classic_, así que el token es de tipo **granular**. Conviene acotarlo:
+
+- **Packages and scopes**: acceso de lectura y escritura limitado al scope `@gestionresidencial`, no a todos los paquetes de la cuenta.
+- **Organizations**: solo lectura. Publicar en un scope no requiere permiso de escritura sobre la organización.
+
+> **El token vence el 19 de diciembre de 2026.** Ese día la publicación empieza a fallar con `401` en Actions, sin aviso previo. Hay que renovarlo en npm y actualizar el secreto en GitHub (actualizar el existente, no crear otro).
+
+El token es una credencial: no debe aparecer en código, en un `.npmrc` versionado, ni en la descripción de un PR. Si se sospecha que quedó expuesto, se revoca en npm y se genera uno nuevo.
 
 ## Consideraciones
 
