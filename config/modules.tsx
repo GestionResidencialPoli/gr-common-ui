@@ -1,4 +1,4 @@
-import type { HomeModule, NavigationItem } from "@gr/shared-ui";
+import type { HomeModule, NavigationItem } from "@gestionresidencial/shared-ui";
 import { ModuleIcon } from "@/components/module-icon";
 import type { Role } from "@/services/auth-service";
 

@@ -1,4 +1,4 @@
-import { Card, HomePage, type HomeModule } from "@gr/shared-ui";
+import { Card, HomePage, type HomeModule } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { modules } from "@/config/modules";
 import { ModuleIcon } from "./module-icon";

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { EmptyState } from "@gr/shared-ui";
+import { EmptyState } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { modules, parkingModule } from "@/config/modules";
 

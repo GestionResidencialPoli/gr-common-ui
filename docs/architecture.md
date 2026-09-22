@@ -2,7 +2,7 @@
 
 ## 1. Dos responsabilidades separadas
 
-La aplicación Next.js está en la raíz del repositorio. La biblioteca reutilizable está en `packages/shared-ui` y se importa como `@gr/shared-ui` mediante el workspace de pnpm.
+La aplicación Next.js está en la raíz del repositorio. La biblioteca reutilizable está en `packages/shared-ui` y se importa como `@gestionresidencial/shared-ui` mediante el workspace de pnpm.
 
 Conservamos Next.js en la raíz para no mover innecesariamente su configuración. No hacen falta dos aplicaciones ni microfrontends para esta entrega. `/preview` cumple la función de demostración de la biblioteca.
 
@@ -15,7 +15,7 @@ Aplicación Next.js
   services → contrato y simulación local
   app → rutas y composición
            ↓
-  @gr/shared-ui → presentación y formularios reutilizables
+  @gestionresidencial/shared-ui → presentación y formularios reutilizables
 ```
 
 ## 2. Biblioteca compartida
@@ -105,7 +105,7 @@ Dos decisiones que evitan cadenas literales dispersas por las pantallas:
 
 `config/env.ts` es el único lugar que lee `process.env`. Resuelve todo al cargar el módulo, no en el momento del acceso, para que el valor no dependa de cuándo se consulte. Lo consumen `next.config.ts`, `playwright.config.ts` y las pruebas E2E.
 
-El contrato de `AuthService` se extendió con `AppUser = Profile & { roles: Role[] }` (en `services/auth-service.ts`, no en `@gr/shared-ui`) para que el frontend pueda proteger rutas por rol sin que la biblioteca compartida conozca roles.
+El contrato de `AuthService` se extendió con `AppUser = Profile & { roles: Role[] }` (en `services/auth-service.ts`, no en `@gestionresidencial/shared-ui`) para que el frontend pueda proteger rutas por rol sin que la biblioteca compartida conozca roles.
 
 ## 6. Edición del perfil
 
@@ -151,35 +151,32 @@ El CSS compartido incluye un reset básico y estilos globales de tipografía. Es
 
 ## 9. Consumir la biblioteca desde otra aplicación
 
-En el mismo workspace, añade `"@gr/shared-ui": "workspace:*"` a las dependencias del consumidor y ejecuta `pnpm install`. En su configuración Next.js:
-
-```ts
-const nextConfig = {
-  transpilePackages: ["@gr/shared-ui"],
-};
-```
+En el mismo workspace, añade `"@gestionresidencial/shared-ui": "workspace:*"` a las dependencias del consumidor y ejecuta `pnpm install`.
 
 Importa los estilos una sola vez en el layout raíz:
 
 ```tsx
-import "@gr/shared-ui/styles.css";
+import "@gestionresidencial/shared-ui/styles.css";
 ```
 
 Después importa los componentes y tipos:
 
 ```tsx
-import { AppShell, HomePage, LoginForm, ProfileForm } from "@gr/shared-ui";
+import { AppShell, HomePage, LoginForm, ProfileForm } from "@gestionresidencial/shared-ui";
 ```
 
-Para otro repositorio, puedes generar un paquete local:
+El paquete se distribuye construido: ESM con declaraciones de tipos en `dist/`. El consumidor **no** necesita `transpilePackages`. Por eso `pnpm build`, `pnpm dev` y `pnpm typecheck` ejecutan antes `build:packages`: la app resuelve el paquete por su `exports`, que apunta a `dist/`.
+
+Para otro repositorio, mientras el paquete no esté publicado en un registro, puedes generar un tarball local:
 
 ```powershell
+pnpm --filter @gestionresidencial/shared-ui build
 pnpm --dir packages/shared-ui pack --pack-destination ../../artifacts
 ```
 
-Instala el `.tgz` generado desde el otro repositorio con `pnpm add <ruta-al-archivo.tgz>`. El paquete exporta TypeScript y JSX, por eso el consumidor necesita compilarlos; Next.js puede hacerlo mediante `transpilePackages`.
+Instálalo desde el otro repositorio con `pnpm add <ruta-al-archivo.tgz>`. Es un puente, no el mecanismo definitivo: la publicación en npmjs.com es el destino y está descrita en [ADR-002](decisiones/ADR-002-distribucion-frontend.md).
 
-No se publicó el paquete en ningún registro. La aplicación consumidora aporta sus textos, destinos y adaptador de autenticación. Compartir componentes de login no comparte automáticamente una sesión entre dominios.
+La aplicación consumidora aporta sus textos, destinos y adaptador de autenticación. Compartir componentes de login no comparte automáticamente una sesión entre dominios.
 
 ## 10. Verificación
 

@@ -1,6 +1,11 @@
 import { apiFetch, ApiClientError } from "@/lib/http-client";
 import { AuthError, AUTH_ERROR } from "./auth-error.ts";
-import type { ChangePasswordValues, LoginValues, Profile, ProfileValues } from "@gr/shared-ui";
+import type {
+  ChangePasswordValues,
+  LoginValues,
+  Profile,
+  ProfileValues,
+} from "@gestionresidencial/shared-ui";
 
 export { AUTH_ERROR, AuthError } from "./auth-error.ts";
 export type { AuthErrorCode } from "./auth-error.ts";

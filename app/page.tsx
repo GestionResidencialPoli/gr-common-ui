@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Skeleton } from "@gr/shared-ui";
+import { Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { homeRouteFor } from "@/lib/roles";
 import { useAuth } from "@/features/auth/auth-provider";

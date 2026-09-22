@@ -1,4 +1,4 @@
-import { EmptyState } from "@gr/shared-ui";
+import { EmptyState } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 
 export const metadata = { title: "Administración" };

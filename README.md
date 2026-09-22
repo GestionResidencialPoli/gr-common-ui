@@ -70,7 +70,7 @@ lib/http-client.ts         Cliente HTTP: CSRF, reintento tras refresh, expiraci�
 proxy.ts                   Redirección a /login sin sesión y reenvío limpio de /api
 config/env.ts              Único punto de lectura de process.env
 services/                  Contrato de autenticación y su implementación contra el backend
-packages/shared-ui/        Biblioteca @gr/shared-ui
+packages/shared-ui/        Biblioteca @gestionresidencial/shared-ui
 docs/architecture.md       Explicación detallada del código y reutilización
 tests/                     Pruebas unitarias y de navegador
 ```

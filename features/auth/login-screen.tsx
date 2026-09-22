@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AuthLayout, Feedback, LoginForm, Skeleton, type LoginValues } from "@gr/shared-ui";
+import {
+  AuthLayout,
+  Feedback,
+  LoginForm,
+  Skeleton,
+  type LoginValues,
+} from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { homeRouteFor } from "@/lib/roles";
 import { AUTH_ERROR } from "@/services/auth-service";

@@ -1,4 +1,4 @@
-import { EmptyState } from "@gr/shared-ui";
+import { EmptyState } from "@gestionresidencial/shared-ui";
 import Link from "next/link";
 import { content } from "@/config/content";
 
