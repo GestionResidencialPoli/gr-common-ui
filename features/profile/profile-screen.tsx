@@ -11,8 +11,8 @@ import {
 } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { useAuth } from "@/features/auth/auth-provider";
-import { AUTH_ERROR } from "@/services/auth-service";
-import { authErrorMessage } from "@/services/auth-error-messages";
+import { AUTH_ERROR } from "@gestionresidencial/auth-client";
+import { authErrorMessage } from "@gestionresidencial/auth-client";
 
 export function ProfileScreen() {
   const { user, updateProfile, changePassword } = useAuth();

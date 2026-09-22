@@ -6,8 +6,8 @@ import type {
   LoginValues,
   ProfileValues,
 } from "@gestionresidencial/shared-ui";
-import { onSessionExpired } from "@/lib/http-client";
-import { authService, type AppUser } from "@/services/auth-service";
+import { onSessionExpired } from "@gestionresidencial/auth-client";
+import { authService, type AppUser } from "@gestionresidencial/auth-client";
 
 type AuthContextValue = {
   user: AppUser | null;

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { AuthError } from "../services/auth-error.ts";
-import { authErrorCodeOf, authErrorMessage } from "../services/auth-error-messages.ts";
+import { AuthError } from "../src/auth-error.ts";
+import { authErrorCodeOf, authErrorMessage } from "../src/auth-error-messages.ts";
 
 const FALLBACK = "mensaje generico";
 

@@ -1,6 +1,6 @@
 import type { HomeModule, NavigationItem } from "@gestionresidencial/shared-ui";
 import { ModuleIcon } from "@/components/module-icon";
-import type { Role } from "@/services/auth-service";
+import type { Role } from "@gestionresidencial/auth-client";
 
 export const modules: HomeModule[] = [
   {

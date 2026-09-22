@@ -1,4 +1,4 @@
-import { apiFetch, ApiClientError } from "@/lib/http-client";
+import { apiFetch, ApiClientError } from "./http-client.ts";
 import { AuthError, AUTH_ERROR } from "./auth-error.ts";
 import type {
   ChangePasswordValues,
