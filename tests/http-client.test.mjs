@@ -58,7 +58,7 @@ test("un 401 de un recurso protegido intenta refrescar y luego anuncia la expira
 test("una peticion mutante siembra la cookie CSRF antes de enviar la cabecera", async () => {
   let cookie = "";
   const calls = withStubs(cookie, (path) => {
-    if (path === "/api/v1/auth/me") {
+    if (path === "/api/v1/auth/csrf") {
       globalThis.document.cookie = "XSRF-TOKEN=sembrado";
       return respondWith(401, null);
     }
@@ -71,7 +71,7 @@ test("una peticion mutante siembra la cookie CSRF antes de enviar la cabecera", 
   stop();
   assert.deepEqual(
     calls.map((call) => `${call.method} ${call.path}`),
-    ["GET /api/v1/auth/me", "POST /api/v1/auth/logout"],
+    ["GET /api/v1/auth/csrf", "POST /api/v1/auth/logout"],
   );
   assert.equal(calls[1].headers.get("X-XSRF-TOKEN"), "sembrado");
 });
