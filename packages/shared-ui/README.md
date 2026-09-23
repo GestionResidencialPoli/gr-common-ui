@@ -63,4 +63,6 @@ pnpm --filter @gestionresidencial/shared-ui build
 
 La salida queda en `dist/`: ESM, mapas de origen, declaraciones de tipos y la hoja de estilos.
 
+¿Vas a agregar un componente? Lee la [guía de contribución](../../docs/contribuir.md) primero — cubre dónde va cada tipo de cambio y cómo probarlo sin publicar.
+
 Consulta [ADR-002](../../docs/decisiones/ADR-002-distribucion-frontend.md) para la decisión de distribución y [docs/architecture.md](../../docs/architecture.md) para el recorrido completo del frontend.
