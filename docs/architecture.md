@@ -2,7 +2,7 @@
 
 ## 1. Dos responsabilidades separadas
 
-La aplicación Next.js está en la raíz del repositorio. La biblioteca reutilizable está en `packages/shared-ui` y se importa como `@gr/shared-ui` mediante el workspace de pnpm.
+La aplicación Next.js está en la raíz del repositorio. La biblioteca reutilizable está en `packages/shared-ui` y se importa como `@gestionresidencial/shared-ui` mediante el workspace de pnpm.
 
 Conservamos Next.js en la raíz para no mover innecesariamente su configuración. No hacen falta dos aplicaciones ni microfrontends para esta entrega. `/preview` cumple la función de demostración de la biblioteca.
 
@@ -12,10 +12,10 @@ La biblioteca no importa archivos de `app`, `config`, `features` o `services`. T
 Aplicación Next.js
   config → textos, identidad, módulos y destinos
   features → comportamiento de login, sesión y perfil
-  services → contrato y simulación local
   app → rutas y composición
            ↓
-  @gr/shared-ui → presentación y formularios reutilizables
+  @gestionresidencial/auth-client → sesión, CSRF, errores, roles y guard
+  @gestionresidencial/shared-ui → presentación y formularios reutilizables
 ```
 
 ## 2. Biblioteca compartida
@@ -32,7 +32,7 @@ Aplicación Next.js
 | `home/home-page.tsx`            | Bienvenida y tarjetas generadas desde una lista de módulos          |
 | `auth/auth-layout.tsx`          | Composición visual de la pantalla de acceso                         |
 | `auth/login-form.tsx`           | Campos y envío de credenciales                                      |
-| `profile/profile-form.tsx`      | Edición del nombre y teléfono, con correo de solo lectura           |
+| `profile/profile-form.tsx`      | Edición del teléfono; nombre opcionalmente editable y correo fijo   |
 | `types.ts`                      | Contratos TypeScript compartidos                                    |
 | `styles.css`                    | Variables visuales y estilos adaptables                             |
 
@@ -68,13 +68,13 @@ El flujo es:
 
 `AuthProvider` se coloca en `app/layout.tsx`, por lo que el login y el perfil comparten el mismo usuario. Al cargar la aplicación, consulta `getSession`.
 
-`AuthenticatedShell` espera esa consulta y dirige a `/login` cuando no hay usuario. Mientras espera, muestra un `Skeleton`. Al cerrar sesión, elimina la sesión demo y vuelve al login.
+`AuthenticatedShell` espera esa consulta y dirige a `/login` cuando no hay usuario. Mientras espera, muestra un `Skeleton`. Al cerrar sesión, invoca `POST /api/v1/auth/logout` para que el backend revoque el refresh token y vuelve al login.
 
 **Esta comprobación es de navegación del frontend, no autorización de datos.** No hay información privada real ni protección de servidor en esta entrega. Cuando exista la API, el backend deberá validar sesiones y permisos en cada operación.
 
-## 5. Servicio de demostración
+## 5. Servicio de autenticación
 
-`services/auth-service.ts` define cuatro métodos:
+`auth-service`, en `@gestionresidencial/auth-client`, define cuatro métodos:
 
 ```ts
 interface AuthService {
@@ -85,19 +85,31 @@ interface AuthService {
 }
 ```
 
-`services/demo-auth-service.ts` implementa ese contrato sin llamadas de red. Acepta únicamente el usuario de demostración y guarda un indicador de sesión y el perfil en `sessionStorage`. No guarda la contraseña.
+**Hay una sola implementación, y habla con el backend real.** No existe simulación ni variable de modo: el flujo que se ejerce en desarrollo, en las pruebas y en producción es el mismo. Una implementación falsa habría dejado sin ejercitar justo el camino que puede romperse.
 
-Los cambios sobreviven a una recarga y a un cierre/inicio de sesión en la misma pestaña. No son datos de una cuenta real, no se comparten entre aplicaciones y no se garantiza persistencia al cerrar la pestaña. Para reiniciarlos se eliminan `gr-demo-session` y `gr-demo-profile` de Session Storage.
+El contrato, la implementación y el singleton `authService` viven en `packages/auth-client/src/auth-service.ts`. El contrato de errores está aparte, en `auth-error.ts` del mismo paquete, sin ninguna dependencia: eso permite probarlo con el runner de Node sin arrastrar alias de rutas ni la biblioteca compartida.
 
-El servicio recibe una función que entrega el almacenamiento. Esto permite importarlo sin acceder a `window` durante el renderizado del servidor y probarlo con almacenamiento en memoria.
+`authService` implementa `AuthService` contra `gr-user-microservice`: `login` llama a `POST /api/v1/auth/login`, `getSession` a `GET /api/v1/auth/me` (única forma de conocer identidad y rol, ya que el access token es `HttpOnly` y el login no devuelve cuerpo) y `logout` a `POST /api/v1/auth/logout`. `updateProfile` llama a `PATCH /api/v1/auth/me`, que hoy solo acepta el teléfono (`UpdateProfileRequest(phone)`): por eso el formulario de perfil recibe `nameEditable={false}` y muestra el nombre en modo lectura. Ofrecer un campo editable cuyo valor el backend descarta habría producido un éxito falso, con el nombre viejo de vuelta al recargar.
 
-`services/index.ts` decide qué servicio utilizar. En desarrollo, el modo predeterminado es demo. En producción, si no se configura nada, el servicio no permite iniciar sesión. `NEXT_PUBLIC_AUTH_MODE=demo` permite una demostración explícita, incluso en una compilación de producción. Esa variable es pública y nunca debe contener secretos.
+Todas las llamadas pasan por `http-client` de `@gestionresidencial/auth-client`, que agrega el header `X-XSRF-TOKEN` en mutaciones, reintenta una vez tras `POST /api/v1/auth/refresh` si la petición recibe `401`, y notifica a los suscriptores de `onSessionExpired` (hoy solo `AuthProvider`) si el refresco también falla. El navegador nunca contacta al backend directamente: `next.config.ts` reescribe `/api/v1/*` hacia `BACKEND_API_URL` del lado del servidor, para que las cookies `SameSite=Strict` del backend viajen sin problemas de origen cruzado en cualquier entorno.
 
-Cuando se aborde el backend, se podrá añadir un adaptador que implemente `AuthService` y seleccionarlo en `services/index.ts`. El contrato real podría requerir ajustar también los tipos y estados; no se han supuesto endpoints, JWT, cookies, recuperación de contraseña ni refresh tokens.
+`proxy.ts` (el archivo que reemplazó a `middleware.ts` en Next.js 16) traduce a `NextResponse` la decisión de `decideSessionAccess`, el guard de `@gestionresidencial/auth-client`: redirige a `/login` en toda ruta protegida cuando no hay cookie `access_token`. Solo `/login` y `/preview` quedan públicas, y esa lista la declara esta aplicación, no el paquete. Que el convenio esté activo se comprueba en la salida de `pnpm build`, que lo lista como `ƒ Proxy (Middleware)`.
+
+El mismo archivo atiende `/api/*` con otro propósito: borra las cabeceras `Origin` y `Referer` antes de que la reescritura las reenvíe al backend. El navegador es del mismo origen que el servidor Next, así que ese `Origin` describe la página, no un cliente remoto; reenviarlo hace que Spring evalúe CORS sobre una petición que en realidad es servidor a servidor y responda `403 Invalid CORS request` a todo `POST` cuando el puerto de desarrollo no está en `CORS_ALLOWED_ORIGINS`. Quitarlo deja el CORS del backend para quien sí lo llame directo y evita tener que enumerar cada puerto del frontend.
+
+## 5.1 Errores y configuración
+
+Dos decisiones que evitan cadenas literales dispersas por las pantallas:
+
+`auth-error-messages`, en `@gestionresidencial/auth-client`, expone `authErrorMessage(error, messages, fallback)`. Cada pantalla declara el mapa de los códigos que le interesan y su texto, y el resto cae al mensaje genérico. Las claves son de tipo `AuthErrorCode`, así que renombrar un código rompe la compilación en cada punto de uso en lugar de degradarse en silencio a un mensaje equivocado.
+
+`config/env.ts` es el único lugar que lee `process.env`. Resuelve todo al cargar el módulo, no en el momento del acceso, para que el valor no dependa de cuándo se consulte. Lo consumen `next.config.ts`, `playwright.config.ts` y las pruebas E2E.
+
+El contrato de `AuthService` se extendió con `AppUser = Profile & { roles: Role[] }` (en `@gestionresidencial/auth-client`, no en `@gestionresidencial/shared-ui`) para que el frontend pueda proteger rutas por rol sin que la biblioteca compartida conozca roles.
 
 ## 6. Edición del perfil
 
-`ProfileScreen` obtiene el usuario del contexto y se lo pasa a `ProfileForm`. El formulario solo envía nombre y teléfono. El correo se presenta como información de solo lectura.
+`ProfileScreen` obtiene el usuario del contexto y se lo pasa a `ProfileForm`. El correo siempre se presenta como información de solo lectura. El nombre lo es también en esta aplicación, porque `PATCH /api/v1/auth/me` solo acepta el teléfono; la biblioteca conserva el parámetro `nameEditable` para que otra aplicación con un backend que sí lo admita pueda habilitarlo sin bifurcar el componente.
 
 Al guardar, el servicio valida campos básicos, conserva identificador y correo, devuelve el perfil actualizado y el contexto actualiza también el encabezado. Se incrementa `revision` para que el formulario tome los datos guardados como su nuevo estado inicial. De esta manera, **Deshacer cambios** vuelve a la última versión guardada.
 
@@ -139,41 +151,37 @@ El CSS compartido incluye un reset básico y estilos globales de tipografía. Es
 
 ## 9. Consumir la biblioteca desde otra aplicación
 
-En el mismo workspace, añade `"@gr/shared-ui": "workspace:*"` a las dependencias del consumidor y ejecuta `pnpm install`. En su configuración Next.js:
+Los componentes viven en `@gestionresidencial/shared-ui` y la lógica de sesión en `@gestionresidencial/auth-client`. Ambos se publican como paquetes públicos en npmjs.com, así que cualquier repositorio los instala sin token ni `.npmrc`:
 
-```ts
-const nextConfig = {
-  transpilePackages: ["@gr/shared-ui"],
-};
+```bash
+pnpm add @gestionresidencial/shared-ui @gestionresidencial/auth-client
 ```
 
 Importa los estilos una sola vez en el layout raíz:
 
 ```tsx
-import "@gr/shared-ui/styles.css";
+import "@gestionresidencial/shared-ui/styles.css";
 ```
 
-Después importa los componentes y tipos:
+Después los componentes y tipos:
 
 ```tsx
-import { AppShell, HomePage, LoginForm, ProfileForm } from "@gr/shared-ui";
+import { AppShell, HomePage, LoginForm, ProfileForm } from "@gestionresidencial/shared-ui";
 ```
 
-Para otro repositorio, puedes generar un paquete local:
+Los paquetes se distribuyen construidos: ESM con declaraciones de tipos. El consumidor **no** necesita `transpilePackages`.
 
-```powershell
-pnpm --dir packages/shared-ui pack --pack-destination ../../artifacts
-```
+Dentro de este workspace, el consumidor declara `"workspace:*"` y `pnpm install` los enlaza a las carpetas locales. Por eso `pnpm build`, `pnpm dev` y `pnpm typecheck` ejecutan antes `build:packages`: la app resuelve el paquete por su `exports`, que apunta a `dist/`.
 
-Instala el `.tgz` generado desde el otro repositorio con `pnpm add <ruta-al-archivo.tgz>`. El paquete exporta TypeScript y JSX, por eso el consumidor necesita compilarlos; Next.js puede hacerlo mediante `transpilePackages`.
+La aplicación consumidora aporta sus textos, sus destinos y sus rutas públicas. Ni `homeRouteFor` ni el guard de sesión fijan rutas: reciben las suyas por configuración, con valores por defecto que reproducen el comportamiento de esta aplicación.
 
-No se publicó el paquete en ningún registro. La aplicación consumidora aporta sus textos, destinos y adaptador de autenticación. Compartir componentes de login no comparte automáticamente una sesión entre dominios.
+Compartir componentes de login no comparte automáticamente una sesión entre dominios. Esa es la razón por la que los frontends se componen sobre un único origen; el razonamiento completo está en [ADR-002](decisiones/ADR-002-distribucion-frontend.md) y el procedimiento de release en [docs/publicacion.md](publicacion.md).
 
 ## 10. Verificación
 
-`tests/demo-auth.test.mjs` usa el runner integrado de Node para comprobar credenciales, sesión, persistencia, validación, protección de campos del perfil y almacenamiento bloqueado.
+`tests/auth-error-messages.test.mjs` y `tests/env.test.mjs` usan el runner integrado de Node, sin red ni navegador: el mapeo de códigos de error a mensajes con sus casos de reserva, y la resolución de variables de entorno incluyendo valores vacíos y la precedencia entre puerto y URL base.
 
-`tests/e2e/community.spec.ts` usa Playwright para recorrer login, perfil, recarga y logout, comprobar los destinos y probar las dos configuraciones en escritorio y móvil. Guarda capturas dentro de `test-results`.
+`tests/e2e/community.spec.ts` usa Playwright para recorrer login, perfil, recarga y logout, comprobar los destinos y probar las dos configuraciones en escritorio y móvil. Guarda capturas dentro de `test-results`. **Requiere el backend activo con sus datos semilla**, y toma las credenciales de `E2E_USER_EMAIL` y `E2E_USER_PASSWORD` para no fijarlas en el código.
 
 Consulta `README.md` para los comandos de ejecución y la prueba manual.
 

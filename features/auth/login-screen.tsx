@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AuthLayout, Feedback, LoginForm, Skeleton, type LoginValues } from "@gr/shared-ui";
+import {
+  AuthLayout,
+  Feedback,
+  LoginForm,
+  Skeleton,
+  type LoginValues,
+} from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
-import { AuthError } from "@/services/auth-service";
-import { isDemoMode } from "@/services";
+import { homeRouteFor } from "@gestionresidencial/auth-client";
+import { AUTH_ERROR } from "@gestionresidencial/auth-client";
+import { authErrorMessage } from "@gestionresidencial/auth-client";
 import { useAuth } from "./auth-provider";
 
 export function LoginScreen() {
@@ -15,22 +22,24 @@ export function LoginScreen() {
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (!loading && user) router.replace("/");
+    if (!loading && user) router.replace(homeRouteFor(user.roles));
   }, [loading, user, router]);
 
   async function submit(values: LoginValues) {
     setPending(true);
     setError(undefined);
     try {
-      await login(values);
-      router.replace("/");
+      const profile = await login(values);
+      router.replace(homeRouteFor(profile.roles));
     } catch (error) {
       setError(
-        error instanceof AuthError && error.code === "invalid_credentials"
-          ? content.auth.invalid
-          : error instanceof AuthError && error.code === "not_configured"
-            ? content.auth.unavailable
-            : content.auth.failed,
+        authErrorMessage(
+          error,
+          {
+            [AUTH_ERROR.InvalidCredentials]: content.auth.invalid,
+          },
+          content.auth.failed,
+        ),
       );
     } finally {
       setPending(false);
@@ -45,7 +54,6 @@ export function LoginScreen() {
         <LoginForm labels={content.loginLabels} pending={pending} error={error} onSubmit={submit} />
       )}
       {sessionError && <Feedback error>{content.auth.failed}</Feedback>}
-      {isDemoMode && <p className="demo-note">{content.auth.demo}</p>}
     </AuthLayout>
   );
 }

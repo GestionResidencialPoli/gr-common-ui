@@ -1,0 +1,75 @@
+name: Publicar paquetes
+
+# La publicacion ocurre solo desde main, que es el estado liberado segun el
+# flujo del equipo: feature/* -> develop -> qa -> release/* -> main.
+on:
+  push:
+    branches: [main]
+  # Disparo manual. Existe para la primera publicacion: los paquetes nunca se
+  # han publicado y esperar un ciclo completo develop -> qa -> release -> main
+  # dejaria bloqueados a los frontends que ya dependen de ellos.
+  # Uso normal: dejar que corra solo al llegar a main.
+  workflow_dispatch:
+
+# Dos publicaciones simultaneas dejarian versiones a medio salir.
+concurrency:
+  group: publicar-paquetes
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write # requerido por npm provenance
+
+jobs:
+  publicar:
+    name: Versionar y publicar
+    runs-on: ubuntu-latest
+    # El disparo manual permite elegir cualquier rama. Sin esta guarda, una
+    # ejecucion desde una rama de trabajo publicaria con las credenciales de npm
+    # saltandose el flujo acordado. Solo main publica.
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Obtener el repositorio
+        uses: actions/checkout@v4
+        with:
+          # Changesets compara contra el historial para saber que cambio.
+          fetch-depth: 0
+
+      - name: Preparar pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Construir los paquetes
+        run: pnpm build:packages
+
+      - name: Ejecutar pruebas
+        run: pnpm test
+
+      # Si hay changesets pendientes, abre un PR de version.
+      # Si no los hay y las versiones ya subieron, publica en npm.
+      # changesets/action@v2 es la linea compatible con Changesets v3, que es la
+      # version del CLI que instala este repositorio. v2 renombro los inputs y
+      # dejo de aceptar el token por variable de entorno.
+      - name: Versionar o publicar
+        uses: changesets/action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version-script: pnpm version-packages
+          publish-script: pnpm release
+          commit-message: "chore(release): versionar paquetes"
+          pr-title: "chore(release): versionar paquetes"
+        env:
+          # La autenticacion con npm la establece actions/setup-node mediante
+          # registry-url; v2 ya no escribe el .npmrc por su cuenta.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"

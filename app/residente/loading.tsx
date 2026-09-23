@@ -1,4 +1,4 @@
-import { Skeleton } from "@gr/shared-ui";
+import { Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 
 export default function Loading() {

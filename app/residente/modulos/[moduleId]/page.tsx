@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { EmptyState } from "@gr/shared-ui";
+import { EmptyState } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { modules, parkingModule } from "@/config/modules";
 
@@ -16,7 +16,7 @@ export default async function ModulePage({ params }: { params: Promise<{ moduleI
         <p>{selectedModule.description}</p>
       </div>
       <EmptyState title={content.module.title} description={content.module.description}>
-        <Link className="gr-button gr-button--secondary" href="/">
+        <Link className="gr-button gr-button--secondary" href="/residente">
           {content.module.back}
         </Link>
       </EmptyState>

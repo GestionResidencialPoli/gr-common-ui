@@ -12,6 +12,7 @@ export function ProfileForm({
   success,
   onSubmit,
   children,
+  nameEditable = true,
 }: {
   initialValues: Profile;
   labels: ProfileLabels;
@@ -20,6 +21,7 @@ export function ProfileForm({
   success?: string;
   onSubmit: (values: ProfileValues) => void;
   children?: ReactNode;
+  nameEditable?: boolean;
 }) {
   const id = useId();
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -36,9 +38,11 @@ export function ProfileForm({
         label={labels.name}
         defaultValue={initialValues.name}
         autoComplete="name"
-        required
+        required={nameEditable}
         maxLength={100}
-        pattern=".*\S.*"
+        pattern={nameEditable ? ".*\\S.*" : undefined}
+        readOnly={!nameEditable}
+        hint={nameEditable ? undefined : labels.nameHelp}
         disabled={pending}
       />
       <TextField
@@ -57,7 +61,12 @@ export function ProfileForm({
         defaultValue={initialValues.phone}
         type="tel"
         autoComplete="tel"
-        maxLength={30}
+        inputMode="numeric"
+        required
+        minLength={10}
+        maxLength={10}
+        pattern="\d{10}"
+        hint={labels.phoneHelp}
         disabled={pending}
       />
       {children}

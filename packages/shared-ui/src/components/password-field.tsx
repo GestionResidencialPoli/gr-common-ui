@@ -4,11 +4,15 @@ import { useId, useState } from "react";
 import { Button, TextField } from "./primitives";
 
 export function PasswordField({
+  name = "password",
+  autoComplete = "current-password",
   label,
   showLabel,
   hideLabel,
   disabled,
 }: {
+  name?: string;
+  autoComplete?: string;
   label: string;
   showLabel: string;
   hideLabel: string;
@@ -20,10 +24,10 @@ export function PasswordField({
     <div className="gr-password">
       <TextField
         id={id}
-        name="password"
+        name={name}
         label={label}
         type={visible ? "text" : "password"}
-        autoComplete="current-password"
+        autoComplete={autoComplete}
         required
         maxLength={256}
         disabled={disabled}
