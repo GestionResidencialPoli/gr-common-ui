@@ -1,6 +1,6 @@
 {
   "name": "@gestionresidencial/auth-client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cliente de sesion compartido por los frontends de Gestion Residencial: CSRF, reintento tras refresh, servicio de autenticacion y guard de rutas.",
   "type": "module",
   "files": [
