@@ -73,4 +73,6 @@ pnpm --filter @gestionresidencial/auth-client test
 
 Las pruebas corren sobre las fuentes con el runner de Node, sin red ni navegador.
 
+¿Vas a agregar algo aquí? Lee la [guía de contribución](../../docs/contribuir.md) primero — cubre dónde va cada tipo de cambio y cómo probarlo sin publicar.
+
 Consulta [ADR-002](../../docs/decisiones/ADR-002-distribucion-frontend.md) para la decisión de distribución y [ADR-001](../../../gr-user-microservice/docs/decisiones/ADR-001-estrategia-tokens.md) para la estrategia de tokens que este cliente implementa del lado del navegador.
