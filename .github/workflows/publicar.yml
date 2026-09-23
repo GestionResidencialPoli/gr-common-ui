@@ -19,7 +19,10 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write # requerido por npm provenance
+  # Requerido para dos cosas: la autenticacion OIDC de Trusted Publishing con
+  # npm (ya no hay NPM_TOKEN) y las attestations de provenance que npm publica
+  # automaticamente cuando la publicacion viene de un Trusted Publisher.
+  id-token: write
 
 jobs:
   publicar:
@@ -60,6 +63,16 @@ jobs:
       # changesets/action@v2 es la linea compatible con Changesets v3, que es la
       # version del CLI que instala este repositorio. v2 renombro los inputs y
       # dejo de aceptar el token por variable de entorno.
+      #
+      # Autenticacion con npm: Trusted Publishing (OIDC), sin NPM_TOKEN.
+      # npm CLI >= 11.5.1 (Node 24 trae 11.9.x) detecta el permiso
+      # id-token: write de este job y pide a GitHub un JWT de un solo uso que
+      # identifica el repositorio, el workflow y la ejecucion exactos. El
+      # registro lo verifica contra el Trusted Publisher configurado en cada
+      # paquete (npmjs.com > paquete > Settings > Trusted Publisher, con
+      # "Allow npm publish" habilitado porque changeset publish publica de
+      # forma directa, no por el flujo de stage-and-approve). No hay secreto
+      # que guardar, rotar ni que pueda vencer.
       - name: Versionar o publicar
         uses: changesets/action@v2
         with:
@@ -68,8 +81,3 @@ jobs:
           publish-script: pnpm release
           commit-message: "chore(release): versionar paquetes"
           pr-title: "chore(release): versionar paquetes"
-        env:
-          # La autenticacion con npm la establece actions/setup-node mediante
-          # registry-url; v2 ya no escribe el .npmrc por su cuenta.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: "true"
