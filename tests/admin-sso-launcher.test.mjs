@@ -18,14 +18,15 @@ test("redirectToHome navega dentro de la app para un destino interno", () => {
   assert.deepEqual(calls, ["/admin"]);
 });
 
-test("/admin emite una vez el código SSO y redirige al callback de gr-admin-ui", () => {
+test("/admin pide el código SSO para la audiencia admin y redirige al callback de gr-admin-ui", () => {
   assert.match(adminPage, /const started = useRef\(false\)/);
   assert.match(adminPage, /if \(started\.current\) return/);
   assert.match(adminPage, /started\.current = true/);
   assert.match(
     adminPage,
-    /apiFetch<\{ code: string \}>\("\/api\/v1\/auth\/admin-sso\/code", \{\s*method: "POST",\s*\}\)/s,
+    /apiFetch<\{ code: string \}>\("\/api\/v1\/auth\/sso\/code", \{\s*method: "POST",\s*body: \{ audience: "admin" \},\s*\}\)/s,
   );
+  assert.doesNotMatch(adminPage, /admin-sso/);
   assert.match(adminPage, /\/auth\/sso\/callback\?code=\$\{encodeURIComponent\(code\)\}/);
   assert.match(adminPage, /window\.location\.replace\(callbackUrl\.toString\(\)\)/);
 });

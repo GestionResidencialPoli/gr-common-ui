@@ -9,11 +9,12 @@ import { apiFetch } from "@gestionresidencial/auth-client";
  *
  * El layout de esta ruta ya exige el rol ADMINISTRACION antes de renderizar
  * esta pagina, asi que al montar solo falta pedir un codigo SSO de un solo
- * uso (POST /api/v1/auth/admin-sso/code, GR-30) y entregarlo en el callback
- * de gr-admin-ui. Ese intercambio ocurre desde el origen de gr-admin-ui, asi
- * que el backend puede fijar ahi una cookie propia de ese origen -- las
- * cookies de sesion son host-only (ver ADR-001 en gr-user-microservice) y de
- * otro modo nunca llegarian a gr-admin-ui.
+ * uso para la audiencia "admin" (POST /api/v1/auth/sso/code, generalizado
+ * en GR-151 a partir de GR-30) y entregarlo en el callback de gr-admin-ui.
+ * Ese intercambio ocurre desde el origen de gr-admin-ui, asi que el backend
+ * puede fijar ahi una cookie propia de ese origen -- las cookies de sesion
+ * son host-only (ver ADR-001 en gr-user-microservice) y de otro modo nunca
+ * llegarian a gr-admin-ui.
  */
 export default function AdminPage() {
   const started = useRef(false);
@@ -25,8 +26,9 @@ export default function AdminPage() {
 
     async function openAdministration() {
       try {
-        const { code } = await apiFetch<{ code: string }>("/api/v1/auth/admin-sso/code", {
+        const { code } = await apiFetch<{ code: string }>("/api/v1/auth/sso/code", {
           method: "POST",
+          body: { audience: "admin" },
         });
         const adminUrl = process.env.NEXT_PUBLIC_ADMIN_UI_URL || "http://localhost:3001";
         const callbackUrl = new URL(
