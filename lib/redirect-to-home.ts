@@ -1,6 +1,5 @@
 import type { Role, RoleHomeRoutes } from "@gestionresidencial/auth-client";
-import { homeRouteFor } from "@gestionresidencial/auth-client";
-import { authUiLoginUrl } from "./auth-ui-url";
+import { authUiLoginUrl, homeRouteFor } from "@gestionresidencial/auth-client";
 
 /**
  * ADMINISTRACION ya no tiene ruta interna en esta app: el lanzador /admin se

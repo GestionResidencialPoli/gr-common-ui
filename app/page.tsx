@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { redirectToHome } from "@/lib/redirect-to-home";
-import { authUiLoginUrl } from "@/lib/auth-ui-url";
+import { authUiLoginUrl } from "@gestionresidencial/auth-client";
 import { useAuth } from "@/features/auth/auth-provider";
 
 export default function RootPage() {

@@ -3,9 +3,9 @@ import type { NextRequest } from "next/server";
 import {
   ACCESS_TOKEN_COOKIE,
   HEADERS_TO_STRIP_ON_FORWARD,
+  authUiLoginUrl,
   decideSessionAccess,
 } from "@gestionresidencial/auth-client";
-import { authUiLoginUrl } from "@/lib/auth-ui-url";
 
 // Rutas publicas de esta aplicacion. Viven aqui, no en el paquete: cada
 // frontend tiene las suyas. El login vive en gr-auth-ui desde GR-155; lo

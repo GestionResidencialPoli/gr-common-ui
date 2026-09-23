@@ -3,7 +3,7 @@ import { AppShell } from "@gestionresidencial/shared-ui";
 import { HomeContent } from "@/components/home-content";
 import { content } from "@/config/content";
 import { modules, parkingModule, residenteNavigation } from "@/config/modules";
-import { authUiLoginUrl } from "@/lib/auth-ui-url";
+import { authUiLoginUrl } from "@gestionresidencial/auth-client";
 
 export const metadata = { title: "Vista previa" };
 

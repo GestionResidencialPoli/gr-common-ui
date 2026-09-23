@@ -5,10 +5,9 @@ import { usePathname } from "next/navigation";
 import { AppShell, Button, EmptyState, Feedback, Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { navigationFor } from "@/config/modules";
-import { homeRouteFor } from "@gestionresidencial/auth-client";
+import { authUiLoginUrl, homeRouteFor } from "@gestionresidencial/auth-client";
 import type { Role } from "@gestionresidencial/auth-client";
 import { ROLE_HOME_ROUTES } from "@/lib/redirect-to-home";
-import { authUiLoginUrl } from "@/lib/auth-ui-url";
 import { useAuth } from "./auth-provider";
 
 export function AuthenticatedShell({
