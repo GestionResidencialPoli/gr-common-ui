@@ -10,7 +10,7 @@ import {
   type LoginValues,
 } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
-import { homeRouteFor } from "@gestionresidencial/auth-client";
+import { redirectToHome } from "@/lib/redirect-to-home";
 import { AUTH_ERROR } from "@gestionresidencial/auth-client";
 import { authErrorMessage } from "@gestionresidencial/auth-client";
 import { useAuth } from "./auth-provider";
@@ -22,7 +22,7 @@ export function LoginScreen() {
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (!loading && user) router.replace(homeRouteFor(user.roles));
+    if (!loading && user) redirectToHome(user.roles, router.replace);
   }, [loading, user, router]);
 
   async function submit(values: LoginValues) {
@@ -30,7 +30,7 @@ export function LoginScreen() {
     setError(undefined);
     try {
       const profile = await login(values);
-      router.replace(homeRouteFor(profile.roles));
+      redirectToHome(profile.roles, router.replace);
     } catch (error) {
       setError(
         authErrorMessage(
