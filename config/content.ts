@@ -21,28 +21,13 @@ export const content = {
   },
   footer: { left: "Habitar · Hecho para vivir en comunidad", right: "Tu unidad, más cerca." },
   auth: {
-    eyebrow: "BIENVENIDO A TU COMUNIDAD",
-    headline: "Tu hogar va más allá de tu puerta.",
-    description:
-      "Un lugar para mantenerte al día, gestionar tus espacios y estar más cerca de tu comunidad.",
-    title: "Bienvenido de nuevo",
-    subtitle: "Ingresa tus datos para acceder a tu unidad.",
-    footer: "Espacios compartidos. Una vida más simple.",
-    failed: "No se pudo iniciar sesión. Intenta nuevamente.",
-    invalid: "El correo o la contraseña no son correctos.",
+    // El login vive en gr-auth-ui (GR-154): esta app ya no tiene formulario
+    // propio, solo lo que necesita mientras hay sesion activa.
     logout: "Cerrar sesión",
     loggingOut: "Saliendo…",
     logoutError: "No se pudo cerrar la sesión. Intenta nuevamente.",
     loading: "Cargando tu espacio…",
     loginLink: "Ir al login",
-  },
-  loginLabels: {
-    email: "Correo electrónico",
-    password: "Contraseña",
-    showPassword: "Mostrar",
-    hidePassword: "Ocultar",
-    submit: "Iniciar sesión",
-    pending: "Ingresando…",
   },
   profile: {
     eyebrow: "TU CUENTA",

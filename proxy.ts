@@ -3,15 +3,17 @@ import type { NextRequest } from "next/server";
 import {
   ACCESS_TOKEN_COOKIE,
   HEADERS_TO_STRIP_ON_FORWARD,
+  authUiLoginUrl,
   decideSessionAccess,
 } from "@gestionresidencial/auth-client";
 
 // Rutas publicas de esta aplicacion. Viven aqui, no en el paquete: cada
-// frontend tiene las suyas.
+// frontend tiene las suyas. El login vive en gr-auth-ui desde GR-155; lo
+// unico publico aqui es el callback que recibe su codigo SSO.
 const GUARD_CONFIG = {
-  publicPaths: ["/login"],
+  publicPaths: ["/auth/sso/callback"],
   publicPrefixes: ["/preview"],
-  loginPath: "/login",
+  loginPath: authUiLoginUrl(),
 };
 
 function forwardToBackend(request: NextRequest) {
