@@ -7,6 +7,14 @@ Este repositorio publica dos paquetes públicos en npmjs.com:
 
 La decisión de publicarlos en npmjs.com y no en GitHub Packages está en [ADR-002](decisiones/ADR-002-distribucion-frontend.md): GitHub Packages exige un token incluso para instalar paquetes públicos, y eso obligaría a cualquier persona que clone un frontend a crear uno antes de que `pnpm install` funcione.
 
+## Verificación en cada Pull Request
+
+Este documento describe **cómo se publica**. La verificación de que el código funciona es un proceso distinto y anterior: `.github/workflows/verificar.yml` corre en cada Pull Request hacia `develop`, `qa` o `main` — `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`, en ese orden — y no toca npm ni necesita `NPM_TOKEN`.
+
+Un PR con un error de lint, de tipos, una prueba rota o un build que falla queda marcado en rojo por GitHub antes de que pueda aprobarse. Es la comprobación automática que respalda el punto "el pipeline de CI/CD está exitoso" del checklist de PR de la guía interna del equipo.
+
+No corre `pnpm test:e2e`: esa suite necesita el backend activo con datos semilla, que este flujo no levanta.
+
 ## Consumir los paquetes
 
 Desde cualquier repositorio, sin token y sin `.npmrc`:
