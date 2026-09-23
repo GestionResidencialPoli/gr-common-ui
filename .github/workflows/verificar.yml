@@ -1,0 +1,53 @@
+name: Verificar Pull Request
+
+# Se dispara en cada Pull Request hacia una rama permanente. No publica nada
+# y no necesita NPM_TOKEN: es solo lectura y verificacion, la misma que
+# exige el checklist de PR de la guia interna del equipo.
+on:
+  pull_request:
+    branches: [develop, qa, main]
+
+# Un nuevo push al PR cancela la verificacion anterior, que ya quedo obsoleta.
+concurrency:
+  group: verificar-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    name: Lint, tipos, pruebas y build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      # Construye los paquetes del workspace: la app y los paquetes resuelven
+      # sus tipos contra dist/, igual que en local (ver package.json raiz).
+      - name: Verificar tipos
+        run: pnpm typecheck
+
+      - name: Pruebas unitarias
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      # pnpm test:e2e queda fuera: requiere el backend activo con datos
+      # semilla, que este flujo no levanta. Ver docs/publicacion.md.
