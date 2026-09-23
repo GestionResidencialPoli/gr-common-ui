@@ -3,6 +3,7 @@ import { AppShell } from "@gestionresidencial/shared-ui";
 import { HomeContent } from "@/components/home-content";
 import { content } from "@/config/content";
 import { modules, parkingModule, residenteNavigation } from "@/config/modules";
+import { authUiLoginUrl } from "@/lib/auth-ui-url";
 
 export const metadata = { title: "Vista previa" };
 
@@ -36,7 +37,7 @@ export default async function PreviewPage({
         navigation={alternate ? [...residenteNavigation, parkingModule] : residenteNavigation}
         activeId="home"
         user={{ name: content.preview.user, caption: content.preview.caption }}
-        userMenuItems={[{ id: "login", label: content.auth.loginLink, href: "/login" }]}
+        userMenuItems={[{ id: "login", label: content.auth.loginLink, href: authUiLoginUrl() }]}
         labels={content.shell}
         eyebrow={content.preview.title}
       >

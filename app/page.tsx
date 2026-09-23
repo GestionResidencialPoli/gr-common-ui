@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { redirectToHome } from "@/lib/redirect-to-home";
+import { authUiLoginUrl } from "@/lib/auth-ui-url";
 import { useAuth } from "@/features/auth/auth-provider";
 
 export default function RootPage() {
@@ -17,7 +18,7 @@ export default function RootPage() {
       redirectToHome(user.roles, router.replace);
       return;
     }
-    router.replace("/login");
+    window.location.replace(authUiLoginUrl());
   }, [loading, user, router]);
 
   return (
