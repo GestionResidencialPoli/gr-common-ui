@@ -92,6 +92,8 @@ Los botones de la biblioteca reciben sus textos mediante `children` o `labels`. 
 
 Lee [la explicación detallada de la arquitectura](docs/architecture.md) para entender el recorrido de los datos, los componentes y cómo instalar el paquete en otro frontend.
 
+Si vas a agregar un componente a `shared-ui`, una función a `auth-client`, o necesitas probar un cambio contra otro repositorio antes de publicarlo, lee la [guía de contribución](docs/contribuir.md).
+
 ## Verificaciones automáticas
 
 ```powershell

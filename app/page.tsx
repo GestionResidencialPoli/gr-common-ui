@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
-import { homeRouteFor } from "@gestionresidencial/auth-client";
+import { redirectToHome } from "@/lib/redirect-to-home";
+import { authUiLoginUrl } from "@gestionresidencial/auth-client";
 import { useAuth } from "@/features/auth/auth-provider";
 
 export default function RootPage() {
@@ -13,7 +14,11 @@ export default function RootPage() {
 
   useEffect(() => {
     if (loading) return;
-    router.replace(user ? homeRouteFor(user.roles) : "/login");
+    if (user) {
+      redirectToHome(user.roles, router.replace);
+      return;
+    }
+    window.location.replace(authUiLoginUrl());
   }, [loading, user, router]);
 
   return (

@@ -1,6 +1,6 @@
 import type { HomeModule, NavigationItem } from "@gestionresidencial/shared-ui";
 import { ModuleIcon } from "@/components/module-icon";
-import type { Role } from "@gestionresidencial/auth-client";
+import { authUiLoginUrl, type Role } from "@gestionresidencial/auth-client";
 
 export const modules: HomeModule[] = [
   {
@@ -47,8 +47,11 @@ export const vigilanteNavigation: NavigationItem[] = [
   { id: "home", label: "Inicio", href: "/vigilante", icon: <ModuleIcon name="home" /> },
 ];
 
+// ADMINISTRACION nunca deberia recibir sesion en esta app (el puente SSO la
+// dirige directo a gr-admin-ui, GR-155), pero si ocurriera, el enlace manda
+// al login central en vez de a una ruta interna que ya no existe.
 export const adminNavigation: NavigationItem[] = [
-  { id: "home", label: "Inicio", href: "/admin", icon: <ModuleIcon name="home" /> },
+  { id: "home", label: "Inicio", href: authUiLoginUrl(), icon: <ModuleIcon name="home" /> },
 ];
 
 export function navigationFor(roles: Role[]): NavigationItem[] {

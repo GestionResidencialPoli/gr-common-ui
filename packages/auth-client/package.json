@@ -20,7 +20,14 @@
   "dependencies": {
     "@gestionresidencial/shared-ui": "workspace:*"
   },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
   "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "tsup": "^8.5.0",
     "typescript": "^5"
   },
