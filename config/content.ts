@@ -85,10 +85,12 @@ export const content = {
     description: "Pronto encontrarás aquí el contenido de este servicio.",
     back: "Volver al inicio",
   },
-  staffModule: {
+  staffHome: {
     eyebrow: "OPERACIÓN DE LA UNIDAD",
-    title: "Este espacio está por llegar",
-    description: "Pronto encontrarás aquí las herramientas de tu rol.",
+    title: "A tu turno.",
+    description: "Las herramientas que necesitas para operar la portería, en un mismo lugar.",
+    sectionTitle: "¿Qué quieres hacer hoy?",
+    sectionDescription: "Accede a las herramientas de tu rol.",
   },
   accessDenied: {
     eyebrow: "ACCESO RESTRINGIDO",

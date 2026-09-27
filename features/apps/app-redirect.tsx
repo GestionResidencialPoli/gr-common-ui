@@ -3,16 +3,23 @@
 import { useEffect } from "react";
 import { Skeleton } from "@gestionresidencial/shared-ui";
 import { initiateSsoHandoff, type SsoAudience } from "@gestionresidencial/auth-client";
-import { wallUiUrl } from "@/lib/wall-ui-url";
 
-export function WallRedirect({ audience }: { audience: SsoAudience }) {
+export function AppRedirect({
+  audience,
+  targetOrigin,
+  label,
+}: {
+  audience: SsoAudience;
+  targetOrigin: string;
+  label: string;
+}) {
   useEffect(() => {
-    initiateSsoHandoff(audience, wallUiUrl()).then();
-  }, [audience]);
+    initiateSsoHandoff(audience, targetOrigin).then();
+  }, [audience, targetOrigin]);
 
   return (
     <div className="standalone-state">
-      <Skeleton label="Abriendo el muro" />
+      <Skeleton label={label} />
     </div>
   );
 }
