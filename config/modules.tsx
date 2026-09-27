@@ -45,6 +45,7 @@ export const residenteNavigation: NavigationItem[] = [
 
 export const vigilanteNavigation: NavigationItem[] = [
   { id: "home", label: "Inicio", href: "/vigilante", icon: <ModuleIcon name="home" /> },
+  { id: "tablero", label: "Tablero", href: "/vigilante/tablero", icon: <ModuleIcon name="board" /> },
 ];
 
 export const adminNavigation: NavigationItem[] = [

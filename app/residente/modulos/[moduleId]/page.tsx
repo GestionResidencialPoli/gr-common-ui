@@ -3,11 +3,13 @@ import Link from "next/link";
 import { EmptyState } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { modules, parkingModule } from "@/config/modules";
+import { WallRedirect } from "@/features/wall/wall-redirect";
 
 export default async function ModulePage({ params }: { params: Promise<{ moduleId: string }> }) {
   const { moduleId } = await params;
   const selectedModule = [...modules, parkingModule].find((item) => item.id === moduleId);
   if (!selectedModule) notFound();
+  if (moduleId === "tablero") return <WallRedirect audience="residente" />;
   return (
     <>
       <div className="page-heading">
