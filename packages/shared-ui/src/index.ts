@@ -9,3 +9,6 @@ export * from "./auth/auth-layout";
 export * from "./auth/login-form";
 export * from "./profile/profile-form";
 export * from "./profile/change-password-form";
+export * from "./wall/types";
+export * from "./wall/categoria-badge";
+export * from "./wall/publicacion-card";
