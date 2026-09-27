@@ -21,8 +21,6 @@ export const content = {
   },
   footer: { left: "Habitar · Hecho para vivir en comunidad", right: "Tu unidad, más cerca." },
   auth: {
-    // El login vive en gr-auth-ui (GR-154): esta app ya no tiene formulario
-    // propio, solo lo que necesita mientras hay sesion activa.
     logout: "Cerrar sesión",
     loggingOut: "Saliendo…",
     logoutError: "No se pudo cerrar la sesión. Intenta nuevamente.",

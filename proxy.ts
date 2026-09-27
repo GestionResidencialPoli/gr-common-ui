@@ -7,9 +7,6 @@ import {
   decideSessionAccess,
 } from "@gestionresidencial/auth-client";
 
-// Rutas publicas de esta aplicacion. Viven aqui, no en el paquete: cada
-// frontend tiene las suyas. El login vive en gr-auth-ui desde GR-155; lo
-// unico publico aqui es el callback que recibe su codigo SSO.
 const GUARD_CONFIG = {
   publicPaths: ["/auth/sso/callback"],
   publicPrefixes: ["/preview"],

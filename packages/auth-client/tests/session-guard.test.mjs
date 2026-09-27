@@ -9,8 +9,6 @@ const CONFIG = {
 };
 
 test("las rutas de la API se reenvian al backend antes de evaluar la sesion", () => {
-  // Sin sesion: aun asi debe reenviarse, porque el login mismo es una llamada
-  // a /api y bloquearla impediria autenticarse.
   const decision = decideSessionAccess("/api/v1/auth/login", false, CONFIG);
   assert.deepEqual(decision, { type: "forward-to-backend" });
 });
@@ -35,8 +33,6 @@ test("los prefijos publicos cubren sus subrutas", () => {
 });
 
 test("un prefijo publico no habilita una ruta que solo lo contiene", () => {
-  // "/previews-internos" empieza distinto a "/preview"? No: lo contiene como
-  // prefijo. Se deja documentado que la comparacion es por prefijo literal.
   assert.deepEqual(decideSessionAccess("/previewX", false, CONFIG), { type: "allow" });
   assert.deepEqual(decideSessionAccess("/otra/preview", false, CONFIG), {
     type: "redirect",

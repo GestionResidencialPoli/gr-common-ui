@@ -47,9 +47,6 @@ export const vigilanteNavigation: NavigationItem[] = [
   { id: "home", label: "Inicio", href: "/vigilante", icon: <ModuleIcon name="home" /> },
 ];
 
-// ADMINISTRACION nunca deberia recibir sesion en esta app (el puente SSO la
-// dirige directo a gr-admin-ui, GR-155), pero si ocurriera, el enlace manda
-// al login central en vez de a una ruta interna que ya no existe.
 export const adminNavigation: NavigationItem[] = [
   { id: "home", label: "Inicio", href: authUiLoginUrl(), icon: <ModuleIcon name="home" /> },
 ];

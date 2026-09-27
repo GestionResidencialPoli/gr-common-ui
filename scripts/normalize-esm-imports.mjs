@@ -1,21 +1,8 @@
-/**
- * Normaliza los especificadores relativos de la salida ESM.
- *
- * El build corre sin empaquetar para preservar las directivas "use client", y
- * en ese modo esbuild no reescribe los especificadores: deja `./x.ts` tal cual
- * o `./x` sin extension. Ninguno de los dos resuelve bajo ESM de Node, donde la
- * extension es obligatoria y el archivo emitido es `./x.js`. Los bundlers lo
- * toleran, Node no, y un paquete publicado debe funcionar en ambos.
- *
- * Uso: node scripts/normalize-esm-imports.mjs <directorio>
- */
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const target = resolve(process.argv[2] ?? "dist");
 
-// Captura la parte del especificador en import/export ... from "..." y en
-// import("...") dinamico, solo cuando es relativo.
 const SPECIFIER = /(\bfrom\s*|\bimport\s*\(\s*)(["'])(\.{1,2}\/[^"']*)\2/g;
 
 function toJsSpecifier(specifier) {
