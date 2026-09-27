@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { apiFetch } from "./http-client";
-import { authUiLoginUrl } from "./auth-ui-url";
+import { apiFetch } from "./http-client.ts";
+import { authUiLoginUrl } from "./auth-ui-url.ts";
 
 function removeCodeFromUrl() {
   window.history.replaceState(null, "", window.location.pathname);
