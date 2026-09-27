@@ -15,8 +15,6 @@ test("quien acumula roles entra por el de mayor alcance", () => {
 });
 
 test("sin roles cae en residente", () => {
-  // El backend siempre asigna al menos un rol; el respaldo evita una pantalla
-  // en blanco si alguna vez llega una sesion sin roles.
   assert.equal(homeRouteFor([]), "/residente");
 });
 
