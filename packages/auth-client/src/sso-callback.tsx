@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { apiFetch } from "./http-client";
-import { authUiLoginUrl } from "./auth-ui-url";
+import { apiFetch } from "./http-client.ts";
+import { authUiLoginUrl } from "./auth-ui-url.ts";
 
 function removeCodeFromUrl() {
   window.history.replaceState(null, "", window.location.pathname);
@@ -13,12 +13,6 @@ function redirectToLogin() {
   window.location.replace(authUiLoginUrl());
 }
 
-/**
- * Recibe el codigo SSO de un solo uso que emite gr-auth-ui (GR-151), lo
- * canjea desde el origen actual y deja al usuario con sesion propia aqui.
- * Mismo contrato y mismo backend en todos los frontends que la consumen
- * (GR-155/GR-156): antes vivia duplicada, byte a byte, en cada app.
- */
 export function SsoCallbackScreen() {
   const started = useRef(false);
   const [message, setMessage] = useState("Completando el inicio de sesión…");
