@@ -1,16 +1,9 @@
-import { EmptyState } from "@gestionresidencial/shared-ui";
+import { HomeContent } from "@/components/home-content";
 import { content } from "@/config/content";
+import { vigilanteModules } from "@/config/modules";
 
 export const metadata = { title: "Portería" };
 
 export default function VigilantePage() {
-  return (
-    <>
-      <div className="page-heading">
-        <span className="gr-eyebrow">{content.staffModule.eyebrow}</span>
-        <h1>Portería</h1>
-      </div>
-      <EmptyState title={content.staffModule.title} description={content.staffModule.description} />
-    </>
-  );
+  return <HomeContent items={vigilanteModules} homeContent={content.staffHome} />;
 }

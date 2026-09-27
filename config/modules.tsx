@@ -43,9 +43,28 @@ export const residenteNavigation: NavigationItem[] = [
   ...modules,
 ];
 
+export const vigilanteModules: HomeModule[] = [
+  {
+    id: "porteria",
+    label: "Portería",
+    description: "Registra el ingreso y la salida de visitantes y consulta el aforo de parqueadero.",
+    href: "/vigilante/porteria",
+    icon: <ModuleIcon name="parking" />,
+    actionLabel: "Ir a portería",
+  },
+  {
+    id: "tablero",
+    label: "Tablero",
+    description: "Noticias, comunicados y lo que está pasando en tu unidad.",
+    href: "/vigilante/tablero",
+    icon: <ModuleIcon name="board" />,
+    actionLabel: "Ver novedades",
+  },
+];
+
 export const vigilanteNavigation: NavigationItem[] = [
   { id: "home", label: "Inicio", href: "/vigilante", icon: <ModuleIcon name="home" /> },
-  { id: "tablero", label: "Tablero", href: "/vigilante/tablero", icon: <ModuleIcon name="board" /> },
+  ...vigilanteModules,
 ];
 
 export const adminNavigation: NavigationItem[] = [

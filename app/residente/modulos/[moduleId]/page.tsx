@@ -3,13 +3,20 @@ import Link from "next/link";
 import { EmptyState } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 import { modules, parkingModule } from "@/config/modules";
-import { WallRedirect } from "@/features/wall/wall-redirect";
+import { AppRedirect } from "@/features/apps/app-redirect";
+import { wallUiUrl } from "@/lib/wall-ui-url";
+import { bookingUiUrl } from "@/lib/booking-ui-url";
 
 export default async function ModulePage({ params }: { params: Promise<{ moduleId: string }> }) {
   const { moduleId } = await params;
   const selectedModule = [...modules, parkingModule].find((item) => item.id === moduleId);
   if (!selectedModule) notFound();
-  if (moduleId === "tablero") return <WallRedirect audience="residente" />;
+  if (moduleId === "tablero") {
+    return <AppRedirect audience="residente" targetOrigin={wallUiUrl()} label="Abriendo el muro" />;
+  }
+  if (moduleId === "reservas") {
+    return <AppRedirect audience="residente" targetOrigin={bookingUiUrl()} label="Abriendo zonas comunes" />;
+  }
   return (
     <>
       <div className="page-heading">
