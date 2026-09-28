@@ -3,6 +3,8 @@
 import { useId, useState } from "react";
 import { Button, TextField } from "./primitives";
 
+export const PASSWORD_POLICY_PATTERN = "(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,72}";
+
 export function PasswordField({
   name = "password",
   autoComplete = "current-password",
@@ -10,6 +12,8 @@ export function PasswordField({
   showLabel,
   hideLabel,
   disabled,
+  policy = false,
+  hint,
 }: {
   name?: string;
   autoComplete?: string;
@@ -17,6 +21,8 @@ export function PasswordField({
   showLabel: string;
   hideLabel: string;
   disabled?: boolean;
+  policy?: boolean;
+  hint?: string;
 }) {
   const [visible, setVisible] = useState(false);
   const id = useId();
@@ -29,7 +35,11 @@ export function PasswordField({
         type={visible ? "text" : "password"}
         autoComplete={autoComplete}
         required
-        maxLength={256}
+        minLength={policy ? 8 : undefined}
+        maxLength={72}
+        pattern={policy ? PASSWORD_POLICY_PATTERN : undefined}
+        title={policy ? hint : undefined}
+        hint={hint}
         disabled={disabled}
       />
       <Button

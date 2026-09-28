@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import type { LoginLabels, LoginValues } from "../types";
 import { Button, Feedback, TextField } from "../components/primitives";
 import { PasswordField } from "../components/password-field";
+import { EMAIL_PATTERN } from "../validation";
 
 export function LoginForm({
   labels,
@@ -32,6 +33,7 @@ export function LoginForm({
         autoComplete="username"
         required
         maxLength={254}
+        pattern={EMAIL_PATTERN}
         disabled={pending}
       />
       <PasswordField

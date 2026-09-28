@@ -74,6 +74,8 @@ export const content = {
   changePasswordLabels: {
     currentPassword: "Contraseña actual",
     newPassword: "Nueva contraseña",
+    passwordPolicy:
+      "Entre 8 y 72 caracteres, con al menos una minúscula, una mayúscula y un dígito.",
     showPassword: "Mostrar",
     hidePassword: "Ocultar",
     submit: "Cambiar contraseña",
