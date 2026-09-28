@@ -4,23 +4,29 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "build:packages": "pnpm --filter \"./packages/*\" build",
+    "dev": "pnpm build:packages && next dev",
+    "build": "pnpm build:packages && next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "next typegen && tsc --noEmit",
-    "test": "node --test tests/*.test.mjs",
+    "typecheck": "pnpm build:packages && next typegen && tsc --noEmit",
+    "test": "node --test tests/*.test.mjs && pnpm -r --if-present test",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "changeset": "changeset",
+    "version-packages": "changeset version && pnpm install --lockfile-only",
+    "release": "pnpm build:packages && changeset publish"
   },
   "dependencies": {
-    "@gr/shared-ui": "workspace:*",
+    "@gestionresidencial/auth-client": "workspace:*",
+    "@gestionresidencial/shared-ui": "workspace:*",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@changesets/cli": "^3.0.3",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

@@ -1,0 +1,29 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "@gestionresidencial/shared-ui";
+import { content } from "@/config/content";
+import { redirectToHome } from "@/lib/redirect-to-home";
+import { authUiLoginUrl } from "@gestionresidencial/auth-client";
+import { useAuth } from "@/features/auth/auth-provider";
+
+export default function RootPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+    if (user) {
+      redirectToHome(user.roles, router.replace);
+      return;
+    }
+    window.location.replace(authUiLoginUrl());
+  }, [loading, user, router]);
+
+  return (
+    <div className="standalone-state">
+      <Skeleton label={content.auth.loading} />
+    </div>
+  );
+}

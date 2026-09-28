@@ -1,6 +1,7 @@
 export * from "./types";
 export * from "./components/primitives";
 export * from "./components/password-field";
+export * from "./validation";
 export * from "./components/dialog";
 export * from "./navigation/dropdown-menu";
 export * from "./layout/app-shell";
@@ -8,3 +9,7 @@ export * from "./home/home-page";
 export * from "./auth/auth-layout";
 export * from "./auth/login-form";
 export * from "./profile/profile-form";
+export * from "./profile/change-password-form";
+export * from "./wall/types";
+export * from "./wall/categoria-badge";
+export * from "./wall/publicacion-card";

@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "test-results/**",
     "playwright-report/**",
+    // Salida de build de los paquetes del workspace: codigo generado.
+    "packages/*/dist/**",
   ]),
 ]);
 

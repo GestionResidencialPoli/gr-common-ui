@@ -1,22 +1,28 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { LoginValues, Profile, ProfileValues } from "@gr/shared-ui";
-import { authService } from "@/services";
+import type {
+  ChangePasswordValues,
+  LoginValues,
+  ProfileValues,
+} from "@gestionresidencial/shared-ui";
+import { onSessionExpired } from "@gestionresidencial/auth-client";
+import { authService, type AppUser } from "@gestionresidencial/auth-client";
 
 type AuthContextValue = {
-  user: Profile | null;
+  user: AppUser | null;
   loading: boolean;
   sessionError: boolean;
-  login: (values: LoginValues) => Promise<void>;
+  login: (values: LoginValues) => Promise<AppUser>;
   logout: () => Promise<void>;
   updateProfile: (values: ProfileValues) => Promise<void>;
+  changePassword: (values: ChangePasswordValues) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<Profile | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionError, setSessionError] = useState(false);
 
@@ -38,10 +44,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => onSessionExpired(() => setUser(null)), []);
+
   async function login(values: LoginValues) {
     const profile = await authService.login(values);
     setUser(profile);
     setSessionError(false);
+    return profile;
   }
 
   async function logout() {
@@ -54,8 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(profile);
   }
 
+  async function changePassword(values: ChangePasswordValues) {
+    await authService.changePassword(values);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, sessionError, login, logout, updateProfile }}>
+    <AuthContext.Provider
+      value={{ user, loading, sessionError, login, logout, updateProfile, changePassword }}
+    >
       {children}
     </AuthContext.Provider>
   );

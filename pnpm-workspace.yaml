@@ -2,5 +2,8 @@ packages:
   - packages/*
 
 allowBuilds:
+  # esbuild descarga su binario de plataforma en postinstall. Lo requiere tsup
+  # para construir los paquetes del workspace.
+  esbuild: true
   sharp: false
   unrs-resolver: false

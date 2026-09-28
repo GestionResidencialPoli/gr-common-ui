@@ -3,6 +3,7 @@
 import { useId, type FormEvent, type ReactNode } from "react";
 import type { Profile, ProfileLabels, ProfileValues } from "../types";
 import { Button, Feedback, TextField } from "../components/primitives";
+import { PERSON_NAME_PATTERN, PHONE_PATTERN } from "../validation";
 
 export function ProfileForm({
   initialValues,
@@ -12,6 +13,7 @@ export function ProfileForm({
   success,
   onSubmit,
   children,
+  nameEditable = true,
 }: {
   initialValues: Profile;
   labels: ProfileLabels;
@@ -20,6 +22,7 @@ export function ProfileForm({
   success?: string;
   onSubmit: (values: ProfileValues) => void;
   children?: ReactNode;
+  nameEditable?: boolean;
 }) {
   const id = useId();
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -36,9 +39,11 @@ export function ProfileForm({
         label={labels.name}
         defaultValue={initialValues.name}
         autoComplete="name"
-        required
+        required={nameEditable}
         maxLength={100}
-        pattern=".*\S.*"
+        pattern={nameEditable ? PERSON_NAME_PATTERN : undefined}
+        readOnly={!nameEditable}
+        hint={nameEditable ? undefined : labels.nameHelp}
         disabled={pending}
       />
       <TextField
@@ -57,7 +62,12 @@ export function ProfileForm({
         defaultValue={initialValues.phone}
         type="tel"
         autoComplete="tel"
-        maxLength={30}
+        inputMode="numeric"
+        required
+        minLength={10}
+        maxLength={10}
+        pattern={PHONE_PATTERN}
+        hint={labels.phoneHelp}
         disabled={pending}
       />
       {children}

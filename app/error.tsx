@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, EmptyState } from "@gr/shared-ui";
+import { Button, EmptyState } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
 
 export default function ErrorPage({ reset }: { reset: () => void }) {
