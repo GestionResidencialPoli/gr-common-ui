@@ -7,7 +7,7 @@ const AUTH_ENDPOINTS_WITHOUT_RETRY = [
   "/api/v1/auth/me/password",
 ];
 const ENDPOINTS_WITH_BUSINESS_UNAUTHORIZED = ["/api/v1/auth/login", "/api/v1/auth/me/password"];
-const CSRF_PRIMING_PATH = "/api/v1/auth/me";
+const CSRF_PRIMING_PATH = "/api/v1/auth/csrf";
 
 export class ApiClientError extends Error {
   status: number;
