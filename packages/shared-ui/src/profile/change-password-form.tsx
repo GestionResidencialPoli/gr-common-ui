@@ -45,6 +45,8 @@ export function ChangePasswordForm({
         showLabel={labels.showPassword}
         hideLabel={labels.hidePassword}
         disabled={pending}
+        policy
+        hint={labels.passwordPolicy}
       />
       {error && <Feedback error>{error}</Feedback>}
       {success && <Feedback>{success}</Feedback>}
