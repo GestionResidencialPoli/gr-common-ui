@@ -1,6 +1,7 @@
 export * from "./types";
 export * from "./components/primitives";
 export * from "./components/password-field";
+export * from "./validation";
 export * from "./components/dialog";
 export * from "./navigation/dropdown-menu";
 export * from "./layout/app-shell";

@@ -3,9 +3,15 @@ import { content } from "@/config/content";
 import { modules } from "@/config/modules";
 import { ModuleIcon } from "./module-icon";
 
-export function HomeContent({ items = modules }: { items?: HomeModule[] }) {
+export function HomeContent({
+  items = modules,
+  homeContent = content.home,
+}: {
+  items?: HomeModule[];
+  homeContent?: typeof content.home;
+}) {
   return (
-    <HomePage {...content.home} modules={items}>
+    <HomePage {...homeContent} modules={items}>
       <Card className="home-note">
         <ModuleIcon name="info" />
         <div>

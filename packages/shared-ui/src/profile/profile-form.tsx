@@ -3,6 +3,7 @@
 import { useId, type FormEvent, type ReactNode } from "react";
 import type { Profile, ProfileLabels, ProfileValues } from "../types";
 import { Button, Feedback, TextField } from "../components/primitives";
+import { PERSON_NAME_PATTERN, PHONE_PATTERN } from "../validation";
 
 export function ProfileForm({
   initialValues,
@@ -40,7 +41,7 @@ export function ProfileForm({
         autoComplete="name"
         required={nameEditable}
         maxLength={100}
-        pattern={nameEditable ? ".*\\S.*" : undefined}
+        pattern={nameEditable ? PERSON_NAME_PATTERN : undefined}
         readOnly={!nameEditable}
         hint={nameEditable ? undefined : labels.nameHelp}
         disabled={pending}
@@ -65,7 +66,7 @@ export function ProfileForm({
         required
         minLength={10}
         maxLength={10}
-        pattern="\d{10}"
+        pattern={PHONE_PATTERN}
         hint={labels.phoneHelp}
         disabled={pending}
       />

@@ -38,6 +38,7 @@ export type ChangePasswordValues = { currentPassword: string; newPassword: strin
 export type ChangePasswordLabels = {
   currentPassword: string;
   newPassword: string;
+  passwordPolicy?: string;
   showPassword: string;
   hidePassword: string;
   submit: string;
