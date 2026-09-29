@@ -15,7 +15,7 @@ async function loadEnv(overrides) {
 test("falls back to the local backend when the variable is absent", async () => {
   const env = await loadEnv({ BACKEND_API_URL: undefined });
 
-  assert.equal(env.backendApiUrl, "http://localhost:8080");
+  assert.equal(env.backendApiUrl, "http://localhost:4000");
 });
 
 test("reads the backend url from the environment", async () => {
@@ -27,7 +27,7 @@ test("reads the backend url from the environment", async () => {
 test("treats an empty variable as absent instead of as an empty url", async () => {
   const env = await loadEnv({ BACKEND_API_URL: "   " });
 
-  assert.equal(env.backendApiUrl, "http://localhost:8080");
+  assert.equal(env.backendApiUrl, "http://localhost:4000");
 });
 
 test("derives the e2e base url from the port when it is not set explicitly", async () => {

@@ -10,7 +10,7 @@
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "types": ["react", "react-dom"]
+    "types": ["node", "react", "react-dom"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]

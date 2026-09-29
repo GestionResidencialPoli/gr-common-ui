@@ -2,10 +2,9 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { AppShell, Button, EmptyState, Feedback, Skeleton } from "@gestionresidencial/shared-ui";
+import { EmptyState, Feedback, PlatformShell, Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
-import { navigationFor } from "@/config/modules";
-import { authUiLoginUrl, homeRouteFor } from "@gestionresidencial/auth-client";
+import { authUiLoginUrl, homeRouteFor, openPlatformUrl } from "@gestionresidencial/auth-client";
 import type { Role } from "@gestionresidencial/auth-client";
 import { ROLE_HOME_ROUTES } from "@/lib/redirect-to-home";
 import { useAuth } from "./auth-provider";
@@ -47,24 +46,16 @@ export function AuthenticatedShell({
     );
 
   const homeHref = homeRouteFor(user.roles, ROLE_HOME_ROUTES);
-  const navigation = navigationFor(user.roles);
-  const activeId = navigation.find((item) => item.href === pathname)?.id;
   const hasAccess = !requiredRole || user.roles.includes(requiredRole);
 
   return (
-    <AppShell
-      brand={{ ...content.brand, href: homeHref }}
-      navigation={navigation}
-      activeId={activeId}
-      user={{ name: user.name, caption: content.profile.caption }}
-      userMenuItems={[{ id: "profile", label: content.profile.link, href: "/perfil" }]}
-      labels={content.shell}
-      eyebrow={content.brand.description}
-      actions={
-        <Button variant="ghost" disabled={pending} onClick={signOut}>
-          {pending ? content.auth.loggingOut : content.auth.logout}
-        </Button>
-      }
+    <PlatformShell
+      app="common"
+      pathname={pathname}
+      user={user}
+      onOpenApp={(url) => void openPlatformUrl(user.roles, url)}
+      onLogout={signOut}
+      loggingOut={pending}
     >
       {error && <Feedback error>{content.auth.logoutError}</Feedback>}
       {hasAccess ? (
@@ -83,6 +74,6 @@ export function AuthenticatedShell({
         <span>{content.footer.left}</span>
         <span>{content.footer.right}</span>
       </footer>
-    </AppShell>
+    </PlatformShell>
   );
 }
