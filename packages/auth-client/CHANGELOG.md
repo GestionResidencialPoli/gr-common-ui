@@ -1,5 +1,12 @@
 # @gestionresidencial/auth-client
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [66f59d4]
+  - @gestionresidencial/shared-ui@0.3.1
+
 ## 0.4.0
 
 ### Minor Changes
