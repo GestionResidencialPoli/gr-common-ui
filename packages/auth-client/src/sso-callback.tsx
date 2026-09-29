@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "./http-client.ts";
 import { authUiLoginUrl } from "./auth-ui-url.ts";
+import { safeNextPath } from "./sso-handoff.ts";
 
 function removeCodeFromUrl() {
   window.history.replaceState(null, "", window.location.pathname);
@@ -21,7 +22,9 @@ export function SsoCallbackScreen() {
     if (started.current) return;
     started.current = true;
 
-    const code = new URLSearchParams(window.location.search).get("code")?.trim();
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code")?.trim();
+    const next = safeNextPath(params.get("next"));
     if (!code) {
       redirectToLogin();
       return;
@@ -31,7 +34,7 @@ export function SsoCallbackScreen() {
       try {
         await apiFetch("/api/v1/auth/sso/exchange", { method: "POST", body: { code } });
         removeCodeFromUrl();
-        window.location.replace("/");
+        window.location.replace(next);
       } catch {
         setMessage("No fue posible completar el inicio de sesión. Redirigiendo al acceso…");
         redirectToLogin();
