@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
+import { ErrorToast } from "./error-toast";
 
 export function Button({
   variant = "primary",
@@ -57,8 +58,9 @@ export function Avatar({ name }: { name: string }) {
 }
 
 export function Feedback({ children, error = false }: { children: ReactNode; error?: boolean }) {
+  if (error) return <ErrorToast>{children}</ErrorToast>;
   return (
-    <div className="gr-feedback" role={error ? "alert" : "status"}>
+    <div className="gr-feedback" role="status">
       {children}
     </div>
   );
