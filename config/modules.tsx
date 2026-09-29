@@ -1,6 +1,5 @@
 import type { HomeModule, NavigationItem } from "@gestionresidencial/shared-ui";
 import { ModuleIcon } from "@/components/module-icon";
-import { authUiLoginUrl, type Role } from "@gestionresidencial/auth-client";
 
 export const modules: HomeModule[] = [
   {
@@ -47,7 +46,8 @@ export const vigilanteModules: HomeModule[] = [
   {
     id: "porteria",
     label: "Portería",
-    description: "Registra el ingreso y la salida de visitantes y consulta el aforo de parqueadero.",
+    description:
+      "Registra el ingreso y la salida de visitantes y consulta el aforo de parqueadero.",
     href: "/vigilante/porteria",
     icon: <ModuleIcon name="parking" />,
     actionLabel: "Ir a portería",
@@ -61,18 +61,3 @@ export const vigilanteModules: HomeModule[] = [
     actionLabel: "Ver novedades",
   },
 ];
-
-export const vigilanteNavigation: NavigationItem[] = [
-  { id: "home", label: "Inicio", href: "/vigilante", icon: <ModuleIcon name="home" /> },
-  ...vigilanteModules,
-];
-
-export const adminNavigation: NavigationItem[] = [
-  { id: "home", label: "Inicio", href: authUiLoginUrl(), icon: <ModuleIcon name="home" /> },
-];
-
-export function navigationFor(roles: Role[]): NavigationItem[] {
-  if (roles.includes("ADMINISTRACION")) return adminNavigation;
-  if (roles.includes("VIGILANTE")) return vigilanteNavigation;
-  return residenteNavigation;
-}

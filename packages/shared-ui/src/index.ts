@@ -13,3 +13,6 @@ export * from "./profile/change-password-form";
 export * from "./wall/types";
 export * from "./wall/categoria-badge";
 export * from "./wall/publicacion-card";
+export * from "./platform/platform";
+export * from "./platform/platform-icon";
+export * from "./platform/platform-shell";

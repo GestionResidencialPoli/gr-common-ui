@@ -6,6 +6,7 @@ import { modules, parkingModule } from "@/config/modules";
 import { AppRedirect } from "@/features/apps/app-redirect";
 import { wallUiUrl } from "@/lib/wall-ui-url";
 import { bookingUiUrl } from "@/lib/booking-ui-url";
+import { billingUiUrl } from "@/lib/billing-ui-url";
 
 export default async function ModulePage({ params }: { params: Promise<{ moduleId: string }> }) {
   const { moduleId } = await params;
@@ -15,7 +16,18 @@ export default async function ModulePage({ params }: { params: Promise<{ moduleI
     return <AppRedirect audience="residente" targetOrigin={wallUiUrl()} label="Abriendo el muro" />;
   }
   if (moduleId === "reservas") {
-    return <AppRedirect audience="residente" targetOrigin={bookingUiUrl()} label="Abriendo zonas comunes" />;
+    return (
+      <AppRedirect
+        audience="residente"
+        targetOrigin={bookingUiUrl()}
+        label="Abriendo zonas comunes"
+      />
+    );
+  }
+  if (moduleId === "administracion") {
+    return (
+      <AppRedirect audience="residente" targetOrigin={billingUiUrl()} label="Abriendo finanzas" />
+    );
   }
   return (
     <>

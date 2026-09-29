@@ -14,7 +14,7 @@ pnpm add @gestionresidencial/auth-client
 
 | Módulo                | Responsabilidad                                                                                                                        |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `http-client`         | `apiFetch` con cabecera CSRF en mutaciones, reintento único tras `POST /api/v1/auth/refresh` ante 401, y aviso de expiración de sesión |
+| `http-client`         | `apiFetch` con cabecera CSRF en mutaciones, reintento único tras `POST /api/v1/auth/refresh` ante 401, refresh concurrente compartido y aviso de expiración de sesión |
 | `auth-service`        | `login`, `logout`, `getSession`, `updateProfile`, `changePassword` contra el backend real                                              |
 | `auth-error`          | `AuthError` y el catálogo `AUTH_ERROR` de códigos                                                                                      |
 | `auth-error-messages` | Traducción de código de error a mensaje, con respaldo                                                                                  |
