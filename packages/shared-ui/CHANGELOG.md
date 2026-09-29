@@ -1,5 +1,11 @@
 # @gestionresidencial/shared-ui
 
+## 0.3.1
+
+### Patch Changes
+
+- 66f59d4: GR-187: los errores de `Feedback error` se muestran como aviso fijo en la parte superior de la ventana (visible sin importar el scroll, tambien dentro de dialogos) con boton para cerrarlo. Se exporta `ErrorToast`.
+
 ## 0.3.0
 
 ### Minor Changes
