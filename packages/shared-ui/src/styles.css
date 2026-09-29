@@ -485,6 +485,59 @@ small {
   background: var(--color-background);
   font-size: 12px;
 }
+.gr-feedback--error {
+  position: fixed;
+  top: 20px;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: min(560px, calc(100% - 32px));
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 14px 18px;
+  border: 1px solid #f0bdb5;
+  border-left: 4px solid #b3261e;
+  border-radius: var(--radius-control);
+  background: #fff3f1;
+  color: #6b1d16;
+  font-size: 14px;
+  line-height: 1.45;
+  box-shadow: 0 14px 36px #0000002b;
+  animation: gr-toast-in 0.18s ease-out;
+}
+.gr-feedback-message {
+  flex: 1;
+  padding-top: 2px;
+}
+.gr-feedback-close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.gr-feedback-close:hover,
+.gr-feedback-close:focus-visible {
+  background: #f7d9d4;
+}
+@keyframes gr-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gr-feedback--error {
+    animation: none;
+  }
+}
 .gr-auth {
   min-height: 100vh;
   display: grid;
