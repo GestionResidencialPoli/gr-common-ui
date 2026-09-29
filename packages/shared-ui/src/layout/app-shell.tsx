@@ -1,17 +1,22 @@
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import type { NavigationItem } from "../types";
 import { Avatar } from "../components/primitives";
 import { DropdownMenu } from "../navigation/dropdown-menu";
+
+export type NavigateHandler = (item: NavigationItem, event: MouseEvent<HTMLAnchorElement>) => void;
 
 type AppShellProps = {
   brand: { name: string; description: string; mark: string; href: string };
   navigation: NavigationItem[];
   activeId?: string;
+  subNavigation?: NavigationItem[];
+  activeSubId?: string;
   user: { name: string; caption: string };
   userMenuItems: NavigationItem[];
   labels: { navigation: string; menu: string; skip: string; footer: string };
   eyebrow: string;
   actions?: ReactNode;
+  onNavigate?: NavigateHandler;
   children: ReactNode;
 };
 
@@ -19,26 +24,53 @@ export function AppShell({
   brand,
   navigation,
   activeId,
+  subNavigation = [],
+  activeSubId,
   user,
   userMenuItems,
   labels,
   eyebrow,
   actions,
+  onNavigate,
   children,
 }: AppShellProps) {
+  const clickHandler = (item: NavigationItem) =>
+    onNavigate ? (event: MouseEvent<HTMLAnchorElement>) => onNavigate(item, event) : undefined;
   const links = navigation.map((item) => (
-    <a key={item.id} href={item.href} aria-current={activeId === item.id ? "page" : undefined}>
-      <span className="gr-nav-icon">{item.icon}</span>
-      {item.label}
-    </a>
+    <div key={item.id} className="gr-nav-group">
+      <a
+        href={item.href}
+        aria-current={activeId === item.id && !activeSubId ? "page" : undefined}
+        data-active={activeId === item.id ? "true" : undefined}
+        onClick={clickHandler(item)}
+      >
+        <span className="gr-nav-icon">{item.icon}</span>
+        {item.label}
+      </a>
+      {activeId === item.id && subNavigation.length > 0 && (
+        <div className="gr-subnav">
+          {subNavigation.map((child) => (
+            <a
+              key={child.id}
+              href={child.href}
+              aria-current={activeSubId === child.id ? "page" : undefined}
+              onClick={clickHandler(child)}
+            >
+              {child.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   ));
+  const brandItem: NavigationItem = { id: "brand", label: brand.name, href: brand.href };
   return (
     <div className="gr-shell">
       <a className="gr-skip" href="#main-content">
         {labels.skip}
       </a>
       <aside className="gr-sidebar">
-        <a className="gr-brand" href={brand.href}>
+        <a className="gr-brand" href={brand.href} onClick={clickHandler(brandItem)}>
           <span className="gr-brand-mark">{brand.mark}</span>
           <span>
             <strong>{brand.name}</strong>
@@ -71,6 +103,7 @@ export function AppShell({
                 </span>
               }
               items={userMenuItems}
+              onNavigate={onNavigate}
             />
             {actions}
           </div>
