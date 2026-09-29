@@ -10,7 +10,8 @@ function flag(name: string): boolean {
 const e2ePort = read("E2E_PORT", "3100");
 
 export const env = {
-  backendApiUrl: read("BACKEND_API_URL", "http://localhost:8080"),
+  // El gateway es el único origen de API expuesto al navegador.
+  backendApiUrl: read("BACKEND_API_URL", "http://localhost:4000"),
   isCI: flag("CI"),
   e2e: {
     port: e2ePort,
