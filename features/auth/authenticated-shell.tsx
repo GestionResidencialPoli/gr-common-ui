@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { EmptyState, Feedback, PlatformShell, Skeleton } from "@gestionresidencial/shared-ui";
 import { content } from "@/config/content";
@@ -21,17 +21,25 @@ export function AuthenticatedShell({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
 
+  const signingOut = useRef(false);
+
   useEffect(() => {
-    if (!loading && !user) window.location.replace(authUiLoginUrl());
+    if (!signingOut.current && !loading && !user) {
+      window.location.replace(authUiLoginUrl());
+    }
   }, [loading, user]);
 
   async function signOut() {
+    signingOut.current = true;
     setPending(true);
     setError(false);
     try {
       await logout();
-      window.location.replace(authUiLoginUrl());
+      const loginUrl = new URL(authUiLoginUrl());
+      loginUrl.searchParams.set("logout", "1");
+      window.location.replace(loginUrl.toString());
     } catch {
+      signingOut.current = false;
       setError(true);
     } finally {
       setPending(false);
