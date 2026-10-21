@@ -13,8 +13,10 @@ ARG NEXT_PUBLIC_AUTH_UI_URL=http://localhost:3002
 ENV BACKEND_API_URL=$BACKEND_API_URL
 ENV NEXT_PUBLIC_AUTH_UI_URL=$NEXT_PUBLIC_AUTH_UI_URL
 COPY . .
-RUN rm -rf packages && node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('package.json')); p.scripts.build='next build'; fs.writeFileSync('package.json', JSON.stringify(p));"
-RUN pnpm build
+RUN rm -rf packages
+# next build directo: "pnpm build" hace que pnpm 12 re-verifique el lockfile contra el
+# workspace (que ya no tiene packages/) y falle cuando la capa deps viene de cache.
+RUN ./node_modules/.bin/next build
 
 FROM node:22-alpine AS runtime
 RUN addgroup -S app && adduser -S app -G app
