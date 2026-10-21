@@ -78,11 +78,11 @@ test("la subnavegacion elige la ruta mas especifica", () => {
   assert.equal(activeLinkId(sub, "/zonas/3"), "zonas");
 });
 
-test("las urls de las apps salen del entorno con respaldo local", () => {
-  const previous = process.env.NEXT_PUBLIC_WALL_UI_URL;
-  process.env.NEXT_PUBLIC_WALL_UI_URL = "https://muro.ejemplo";
+test("las urls de las apps salen del entorno de runtime con respaldo local", () => {
+  const previous = process.env.WALL_UI_URL;
+  process.env.WALL_UI_URL = "https://muro.ejemplo";
   assert.equal(platformUrls().wall, "https://muro.ejemplo");
-  delete process.env.NEXT_PUBLIC_WALL_UI_URL;
+  delete process.env.WALL_UI_URL;
   assert.equal(platformUrls().wall, "http://localhost:3003");
-  if (previous !== undefined) process.env.NEXT_PUBLIC_WALL_UI_URL = previous;
+  if (previous !== undefined) process.env.WALL_UI_URL = previous;
 });

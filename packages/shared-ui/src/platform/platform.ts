@@ -12,14 +12,34 @@ export type PlatformLink = {
   icon: PlatformIconName;
 };
 
+type RuntimePlatformUrls = Partial<PlatformUrls>;
+
+function runtimeConfig(): RuntimePlatformUrls {
+  if (typeof window === "undefined") return {};
+  return (
+    (window as unknown as { __RUNTIME_CONFIG__?: RuntimePlatformUrls }).__RUNTIME_CONFIG__ ?? {}
+  );
+}
+
 export function platformUrls(): PlatformUrls {
+  if (typeof window !== "undefined") {
+    const config = runtimeConfig();
+    return {
+      common: config.common || "http://localhost:3000",
+      admin: config.admin || "http://localhost:3001",
+      wall: config.wall || "http://localhost:3003",
+      booking: config.booking || "http://localhost:3004",
+      gate: config.gate || "http://localhost:3005",
+      billing: config.billing || "http://localhost:3007",
+    };
+  }
   return {
-    common: process.env.NEXT_PUBLIC_COMMON_UI_URL || "http://localhost:3000",
-    admin: process.env.NEXT_PUBLIC_ADMIN_UI_URL || "http://localhost:3001",
-    wall: process.env.NEXT_PUBLIC_WALL_UI_URL || "http://localhost:3003",
-    booking: process.env.NEXT_PUBLIC_BOOKING_UI_URL || "http://localhost:3004",
-    gate: process.env.NEXT_PUBLIC_GATE_UI_URL || "http://localhost:3005",
-    billing: process.env.NEXT_PUBLIC_BILLING_UI_URL || "http://localhost:3007",
+    common: process.env.COMMON_UI_URL || "http://localhost:3000",
+    admin: process.env.ADMIN_UI_URL || "http://localhost:3001",
+    wall: process.env.WALL_UI_URL || "http://localhost:3003",
+    booking: process.env.BOOKING_UI_URL || "http://localhost:3004",
+    gate: process.env.GATE_UI_URL || "http://localhost:3005",
+    billing: process.env.BILLING_UI_URL || "http://localhost:3007",
   };
 }
 
