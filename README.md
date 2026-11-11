@@ -28,6 +28,8 @@ El navegador nunca habla directamente con el backend: `next.config.ts` reescribe
 
 `http-client`, dentro de `@gestionresidencial/auth-client`, centraliza cada llamada: agrega el header `X-XSRF-TOKEN` en mutaciones (leyendo la cookie legible `XSRF-TOKEN`), reintenta una vez tras `POST /api/v1/auth/refresh` si una petición recibe `401`, comparte una única renovación cuando varias llamadas expiran a la vez y solo notifica a `AuthProvider` para cerrar la sesión localmente si el backend confirma que el refresh token ya no es válido. Un `429`, un error de red o un `5xx` temporal no desloguea al usuario. `proxy.ts` redirige a `/login` cuando no hay cookie `access_token` en rutas protegidas. En Next.js 16 el convenio `middleware` quedó deprecado y se renombró a `proxy`: el archivo va en la raíz y exporta una función `proxy` con su `config.matcher`. El build lo confirma listándolo como `ƒ Proxy (Middleware)`.
 
+Las notificaciones de nuevas publicaciones (`features/notifications/wall-notification-listener.tsx`) abren un WebSocket en el mismo origen de la página (`/api/v1/publicaciones/eventos/ws`), porque las rewrites de Next.js no reenvían upgrades. En el stack local, nginx (`gr-infra/nginx`) atiende cada puerto de UI y envía `/api/` (incluido el upgrade) directo al gateway, quitando `Origin` y `Referer` igual que `proxy.ts`. Sin nginx (`pnpm dev`), define `NEXT_PUBLIC_BACKEND_WS_URL=ws://localhost:4000` antes de compilar.
+
 `GET /api/v1/auth/me` es la única forma de conocer la identidad y el rol de la sesión activa: el access token es `HttpOnly` y el login no devuelve cuerpo.
 
 Para correr contra el backend real en local:
