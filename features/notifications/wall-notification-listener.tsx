@@ -9,12 +9,8 @@ function websocketOrigin(): string {
   const configuredOrigin = process.env.NEXT_PUBLIC_BACKEND_WS_URL;
   if (configuredOrigin) return configuredOrigin.replace(/\/$/, "");
 
-  const { hostname, protocol } = window.location;
-  const scheme = protocol === "https:" ? "wss:" : "ws:";
-  if (hostname === "localhost" || hostname === "127.0.0.1") return `${scheme}//${hostname}:4000`;
-  if (hostname.endsWith(".gr.local")) return `${scheme}//gateway.gr.local`;
-  if (hostname.startsWith("app.")) return `${scheme}//api.${hostname.slice("app.".length)}`;
-  return `${scheme}//${hostname}`;
+  const { host, protocol } = window.location;
+  return `${protocol === "https:" ? "wss:" : "ws:"}//${host}`;
 }
 
 export function WallNotificationListener() {
