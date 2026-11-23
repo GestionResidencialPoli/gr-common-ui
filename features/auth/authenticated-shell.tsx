@@ -8,7 +8,7 @@ import { authUiLoginUrl, homeRouteFor, openPlatformUrl } from "@gestionresidenci
 import type { Role } from "@gestionresidencial/auth-client";
 import { ROLE_HOME_ROUTES } from "@/lib/redirect-to-home";
 import { useAuth } from "./auth-provider";
-import { WallNotificationListener } from "@/features/notifications/wall-notification-listener";
+import { HubNotificationListener } from "@/features/notifications/hub-notification-listener";
 
 export function AuthenticatedShell({
   children,
@@ -59,7 +59,7 @@ export function AuthenticatedShell({
       loggingOut={pending}
     >
       {error && <Feedback error>{content.auth.logoutError}</Feedback>}
-      <WallNotificationListener />
+      <HubNotificationListener />
       {hasAccess ? (
         children
       ) : (
