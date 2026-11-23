@@ -32,6 +32,16 @@ FROM node:22-alpine AS runtime
 RUN addgroup -S app && adduser -S app -G app
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_PUBLIC_AUTH_UI_URL=http://localhost:3002
+ARG NEXT_PUBLIC_COMMON_UI_URL=http://localhost:3000
+ARG NEXT_PUBLIC_ADMIN_UI_URL=http://localhost:3001
+ARG NEXT_PUBLIC_WALL_UI_URL=http://localhost:3003
+ARG NEXT_PUBLIC_BOOKING_UI_URL=http://localhost:3004
+ARG NEXT_PUBLIC_GATE_UI_URL=http://localhost:3005
+ARG NEXT_PUBLIC_BILLING_UI_URL=http://localhost:3007
+ENV AUTH_UI_URL=$NEXT_PUBLIC_AUTH_UI_URL COMMON_UI_URL=$NEXT_PUBLIC_COMMON_UI_URL ADMIN_UI_URL=$NEXT_PUBLIC_ADMIN_UI_URL
+ENV WALL_UI_URL=$NEXT_PUBLIC_WALL_UI_URL BOOKING_UI_URL=$NEXT_PUBLIC_BOOKING_UI_URL GATE_UI_URL=$NEXT_PUBLIC_GATE_UI_URL BILLING_UI_URL=$NEXT_PUBLIC_BILLING_UI_URL
+
 COPY --from=build --chown=app:app /app/.next/standalone ./
 COPY --from=build --chown=app:app /app/.next/static ./.next/static
 COPY --from=build --chown=app:app /app/public ./public
