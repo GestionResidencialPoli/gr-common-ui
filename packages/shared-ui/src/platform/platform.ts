@@ -25,12 +25,12 @@ export function platformUrls(): PlatformUrls {
   if (typeof window !== "undefined") {
     const config = runtimeConfig();
     return {
-      common: config.common || "http://localhost:3000",
-      admin: config.admin || "http://localhost:3001",
-      wall: config.wall || "http://localhost:3003",
-      booking: config.booking || "http://localhost:3004",
-      gate: config.gate || "http://localhost:3005",
-      billing: config.billing || "http://localhost:3007",
+      common: config.common || process.env.NEXT_PUBLIC_COMMON_UI_URL || "http://localhost:3000",
+      admin: config.admin || process.env.NEXT_PUBLIC_ADMIN_UI_URL || "http://localhost:3001",
+      wall: config.wall || process.env.NEXT_PUBLIC_WALL_UI_URL || "http://localhost:3003",
+      booking: config.booking || process.env.NEXT_PUBLIC_BOOKING_UI_URL || "http://localhost:3004",
+      gate: config.gate || process.env.NEXT_PUBLIC_GATE_UI_URL || "http://localhost:3005",
+      billing: config.billing || process.env.NEXT_PUBLIC_BILLING_UI_URL || "http://localhost:3007",
     };
   }
   return {
