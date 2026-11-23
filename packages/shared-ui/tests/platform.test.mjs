@@ -86,3 +86,21 @@ test("las urls de las apps salen del entorno de runtime con respaldo local", () 
   assert.equal(platformUrls().wall, "http://localhost:3003");
   if (previous !== undefined) process.env.WALL_UI_URL = previous;
 });
+
+
+test("el navegador acepta URLs de build y da prioridad a la configuración runtime", () => {
+  const previousWindow = globalThis.window;
+  const previousUrl = process.env.NEXT_PUBLIC_WALL_UI_URL;
+  try {
+    globalThis.window = {};
+    process.env.NEXT_PUBLIC_WALL_UI_URL = "https://muro.build.ejemplo";
+    assert.equal(platformUrls().wall, "https://muro.build.ejemplo");
+    globalThis.window.__RUNTIME_CONFIG__ = { wall: "https://muro.runtime.ejemplo" };
+    assert.equal(platformUrls().wall, "https://muro.runtime.ejemplo");
+  } finally {
+    if (previousWindow === undefined) delete globalThis.window;
+    else globalThis.window = previousWindow;
+    if (previousUrl === undefined) delete process.env.NEXT_PUBLIC_WALL_UI_URL;
+    else process.env.NEXT_PUBLIC_WALL_UI_URL = previousUrl;
+  }
+});
