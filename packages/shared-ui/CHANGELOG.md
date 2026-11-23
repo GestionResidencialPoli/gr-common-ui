@@ -1,5 +1,11 @@
 # @gestionresidencial/shared-ui
 
+## 0.3.3
+
+### Patch Changes
+
+- ac1595d: Adapt navigation, authentication, form controls and dialogs for mobile and tablet, with consistent touch targets and readable inputs.
+
 ## 0.3.2
 
 ### Patch Changes
