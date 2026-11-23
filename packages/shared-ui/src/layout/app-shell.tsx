@@ -34,8 +34,11 @@ export function AppShell({
   onNavigate,
   children,
 }: AppShellProps) {
-  const clickHandler = (item: NavigationItem) =>
-    onNavigate ? (event: MouseEvent<HTMLAnchorElement>) => onNavigate(item, event) : undefined;
+  const clickHandler = (item: NavigationItem) => (event: MouseEvent<HTMLAnchorElement>) => {
+    const disclosure = event.currentTarget.closest("details.gr-mobile-nav");
+    if (disclosure) disclosure.removeAttribute("open");
+    onNavigate?.(item, event);
+  };
   const links = navigation.map((item) => (
     <div key={item.id} className="gr-nav-group">
       <a
@@ -109,7 +112,14 @@ export function AppShell({
           </div>
         </header>
         <details className="gr-mobile-nav">
-          <summary>{labels.menu}</summary>
+          <summary>
+            <span>
+              {labels.menu}
+              <span className="gr-mobile-nav-current">
+                {navigation.find((item) => item.id === activeId)?.label}
+              </span>
+            </span>
+          </summary>
           <nav aria-label={labels.navigation} className="gr-nav">
             {links}
           </nav>
